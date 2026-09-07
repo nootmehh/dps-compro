@@ -41,7 +41,7 @@ export default function Hero({
       {/* Hero Content Container */}
       <div className="relative z-10 w-full max-w-360 px-6 md:px-16 lg:px-24 py-16 lg:py-24 flex-1 flex flex-col justify-end items-start">
         {/* Text & CTA Column */}
-        <div className="w-full max-w-146.5 flex flex-col justify-start items-start gap-6">
+        <div className="w-full max-w-146.5 flex flex-col justify-start items-start gap-6 relative z-10">
           {/* Logo Icon on Top of Heading */}
           <div className="flex items-center">
             <img
@@ -85,8 +85,8 @@ export default function Hero({
         </div>
       </div>
 
-      {/* Absolute Bottom-Right Hero Illustration */}
-      <div className="absolute right-0 md:right-4 lg:right-12 xl:right-16 bottom-0 z-0 pointer-events-none hidden md:flex items-end justify-end">
+      {/* Absolute Bottom-Right Hero Illustration (Touches bottom of section, aligned to container right padding) */}
+      <div className="absolute inset-x-0 bottom-0 max-w-360 px-6 md:px-16 lg:px-24 mx-auto pointer-events-none hidden md:flex justify-end items-end z-0">
         <img
           className="w-auto h-60 sm:h-76 md:h-97.5 lg:h-115 xl:h-127.5 max-w-105 sm:max-w-132.5 lg:max-w-162.5 object-contain object-bottom select-none"
           src="/illustration/Hero Illustration.png"

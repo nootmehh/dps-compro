@@ -7,6 +7,9 @@ export const LORD_ICON_MAP: Record<string, string> = {
   // Navigation & Menu
   Dashboard: "/lord-icons/system/system-outline-153-bar-chart-vertical-grow-hover-pinch.json",
   Category: "/lord-icons/system/system-outline-153-bar-chart-vertical-grow-hover-pinch.json",
+  Hamburger: "/lord-icons/system/system-outline-4172-menu-hamburger-morph-cross.json",
+  HamburgerMorph: "/lord-icons/system/system-outline-4172-menu-hamburger-morph-cross.json",
+  Menu: "/lord-icons/system/system-outline-4172-menu-hamburger-morph-cross.json",
   User: "/lord-icons/system/system-outline-44-avatar-circle-hover-pinch.json",
   Profile: "/lord-icons/system/system-outline-44-avatar-circle-hover-pinch.json",
   Global: "/lord-icons/system/system-outline-458-target-center-hover-pinch.json",
@@ -74,6 +77,18 @@ export const LORD_ICON_MAP: Record<string, string> = {
   Wheelbarrow: "/lord-icons/lineal/wired-lineal-1823-wheelbarrow-hover-pinch.json",
   WheelBarrow: "/lord-icons/lineal/wired-lineal-1823-wheelbarrow-hover-pinch.json",
   PaintBucket: "/lord-icons/lineal/wired-lineal-769-paint-bucket-hover-pinch.json",
+  StorageBox: "/lord-icons/lineal/wired-lineal-988-storage-box-morph-open.json",
+  "storage-box": "/lord-icons/lineal/wired-lineal-988-storage-box-morph-open.json",
+  PhoneQuestion: "/lord-icons/lineal/wired-lineal-3600-phone-question-hover-calling.json",
+  "phone-question": "/lord-icons/lineal/wired-lineal-3600-phone-question-hover-calling.json",
+  RoadNavigation: "/lord-icons/lineal/wired-lineal-3367-road-navigation-hover-pinch.json",
+  "road-navigation": "/lord-icons/lineal/wired-lineal-3367-road-navigation-hover-pinch.json",
+  Signature: "/lord-icons/lineal/wired-lineal-1019-file-signature-hover-pinch.json",
+  signature: "/lord-icons/lineal/wired-lineal-1019-file-signature-hover-pinch.json",
+  BrushAlt: "/lord-icons/lineal/wired-lineal-762-brush-alt-hover-pinch.json",
+  "brush-alt": "/lord-icons/lineal/wired-lineal-762-brush-alt-hover-pinch.json",
+  Handshake: "/lord-icons/lineal/wired-lineal-456-handshake-hover-pinch.json",
+  handshake: "/lord-icons/lineal/wired-lineal-456-handshake-hover-pinch.json",
 };
 
 export interface LordIconProps {

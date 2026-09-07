@@ -46,6 +46,16 @@ export default function Footer({
         aria-hidden="true"
       />
 
+      {/* Background Badge Illustration (Always full height from top to bottom of the footer, responsive horizontal offset) */}
+      <div className="absolute inset-0 pointer-events-none flex justify-end items-end z-0 overflow-hidden">
+        <img
+          src="/illustration/badgeBackground.png"
+          alt="Badge Background"
+          className="h-full w-auto max-w-none object-cover object-right select-none translate-x-[12%] min-[720px]:translate-x-[8%] min-[1024px]:translate-x-0 transition-transform duration-300"
+          aria-hidden="true"
+        />
+      </div>
+
       <div className="relative z-10 w-full max-w-360 px-6 md:px-16 lg:px-24 py-10 md:py-12 mx-auto flex flex-col gap-8">
         {/* Main Footer Row */}
         <div className="w-full flex flex-col lg:flex-row justify-between items-start gap-10 lg:gap-16">
@@ -131,8 +141,8 @@ export default function Footer({
               </nav>
             </div>
 
-            {/* Column 2: IKUTI KAMI & AKSI CEPAT */}
-            <div className="flex flex-col gap-6">
+            {/* Column 2: IKUTI KAMI & AKSI CEPAT (Stacked vertically) */}
+            <div className="flex flex-col items-start gap-6">
               {/* Follow Us Social Media Icons */}
               <div className="flex flex-col gap-3">
                 <span className="text-white-70/70 text-sm font-sans tracking-widest uppercase">
@@ -168,7 +178,7 @@ export default function Footer({
                 </div>
               </div>
 
-              {/* Quick Action Button (No shadow) */}
+              {/* Quick Action Button (Always under Ikuti Kami) */}
               <div className="flex flex-col gap-3">
                 <span className="text-white-70/70 text-sm font-sans tracking-widest uppercase">
                   AKSI CEPAT
@@ -179,7 +189,7 @@ export default function Footer({
                   variant="unique-green"
                   rightIcon="Phone"
                   onClick={onQuoteClick}
-                  className="cursor-pointer shadow-none [&_.pill-segment]:shadow-none"
+                  className="cursor-pointer shadow-none [&_.pill-segment]:shadow-none whitespace-nowrap [&_.pill-segment]:whitespace-nowrap"
                 />
               </div>
             </div>

@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import ArticleCard from "@/components/card/articleCard";
 import Button from "@/components/ui/button";
 import LordIcon from "@/components/common/lordIcon";
+import EmptyState from "@/components/common/emptyState";
+import { getArticles, getArticleSlug } from "@/api/articles";
 import type { BadgeVariant } from "@/components/ui/badge";
 
 interface ArticleItemData {
@@ -15,91 +17,34 @@ interface ArticleItemData {
   categoryVariant: BadgeVariant;
   title: string;
   date: string;
+  timestamp: number; // for chronological sorting
   href: string;
 }
 
-const ALL_ARTICLES: ArticleItemData[] = [
-  {
-    id: 1,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Penghargaan & Pencapaian",
-    categoryVariant: "pink",
-    title:
-      "Komitmen Terhadap Keselamatan, Perusahaan Raih Penghargaan Zero Accident 2026",
-    date: "10 Juli, 2026",
-    href: "/artikel/zero-accident-2026",
-  },
-  {
-    id: 2,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Proyek & Infrastruktur",
-    categoryVariant: "amber",
-    title: "Penyelesaian Proyek Marka Jalan Tol Cipali Selesai Lebih Awal",
-    date: "8 Juli, 2026",
-    href: "/artikel/proyek-tol-cipali",
-  },
-  {
-    id: 3,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Tanggung Jawab Sosial (CSR)",
-    categoryVariant: "green",
-    title:
-      "Program CSR: Revitalisasi Zona Selamat Sekolah (ZoSS) di Kota Depok",
-    date: "6 Juli, 2026",
-    href: "/artikel/csr-zoss-depok",
-  },
-  {
-    id: 4,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Inovasi Produk",
-    categoryVariant: "sky",
-    title:
-      "Peluncuran Inovasi Cat Coldplastic Ramah Lingkungan Generasi Terbaru",
-    date: "4 Juli, 2026",
-    href: "/artikel/inovasi-coldplastic",
-  },
-  {
-    id: 5,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Penghargaan & Pencapaian",
-    categoryVariant: "pink",
-    title:
-      "Dukung Program Pemerintah, Produk Cat Marka Kami Capai Nilai TKDN Tinggi",
-    date: "2 Juli, 2026",
-    href: "/artikel/tkdn-cat-marka",
-  },
-  {
-    id: 6,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Inovasi Produk",
-    categoryVariant: "sky",
-    title: "Mengenal Perbedaan Cat Marka Thermoplastic dan Coldplastic",
-    date: "28 Juni, 2026",
-    href: "/artikel/perbedaan-cat-marka",
-  },
-  {
-    id: 7,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Proyek & Infrastruktur",
-    categoryVariant: "amber",
-    title:
-      "Sukses Selesaikan Pemasangan PJU Tenaga Surya di Kawasan Industri Terpadu",
-    date: "25 Juni, 2026",
-    href: "/artikel/pju-tenaga-surya",
-  },
-  {
-    id: 8,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Proyek & Infrastruktur",
-    categoryVariant: "amber",
-    title:
-      "Pentingnya Instalasi Guardrail Berstandar SNI di Jalur Rawan Kecelakaan",
-    date: "24 Juni, 2026",
-    href: "/artikel/guardrail-sni",
-  },
-];
+function getCategoryVariant(category?: string | null): BadgeVariant {
+  if (!category) return "pink";
+  const cat = category.toLowerCase();
+  if (cat.includes("marka") || cat.includes("bahan") || cat.includes("material")) return "amber";
+  if (cat.includes("keselamatan") || cat.includes("penghargaan") || cat.includes("pencapaian")) return "pink";
+  if (cat.includes("perlengkapan") || cat.includes("lalu lintas") || cat.includes("rambu")) return "blue";
+  if (cat.includes("mesin") || cat.includes("peralatan") || cat.includes("elektrikal")) return "gray";
+  return "green";
+}
 
-const FILTER_CATEGORIES = [
+function formatDate(dateStr: string): string {
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
+const DEFAULT_FILTER_CATEGORIES = [
   "Semua",
   "Penghargaan & Pencapaian",
   "Proyek & Infrastruktur",
@@ -108,14 +53,81 @@ const FILTER_CATEGORIES = [
 ];
 
 export default function ArticleCatalogPage() {
+  const [articles, setArticles] = useState<ArticleItemData[]>([]);
+  const [categories, setCategories] = useState<string[]>(DEFAULT_FILTER_CATEGORIES);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [selectedSort, setSelectedSort] = useState<"terbaru" | "terlama">("terbaru");
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Filtered articles
+  // Temporary filter modal states (applied on clicking "Terapkan Filter")
+  const [tempCategory, setTempCategory] = useState("Semua");
+  const [tempSort, setTempSort] = useState<"terbaru" | "terlama">("terbaru");
+
+  const filterContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    async function loadData() {
+      const data = await getArticles();
+      const mapped: ArticleItemData[] = data.map((a) => ({
+        id: a.id,
+        imageSrc: "https://placehold.co/320x160",
+        category: a.category || "Artikel",
+        categoryVariant: getCategoryVariant(a.category),
+        title: a.title,
+        date: formatDate(a.created_at),
+        timestamp: new Date(a.created_at).getTime(),
+        href: `/artikel/${getArticleSlug(a, data)}`,
+      }));
+      setArticles(mapped);
+
+      const distinctCats = Array.from(
+        new Set(data.map((a) => a.category).filter(Boolean))
+      ) as string[];
+      if (distinctCats.length > 0) {
+        setCategories(["Semua", ...distinctCats]);
+      }
+    }
+    loadData();
+  }, []);
+
+  // Open filter pop-up and synchronize temporary state
+  const handleOpenFilter = () => {
+    setTempCategory(selectedCategory);
+    setTempSort(selectedSort);
+    setFilterDropdownOpen(!filterDropdownOpen);
+  };
+
+  // Close filter on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        filterContainerRef.current &&
+        !filterContainerRef.current.contains(event.target as Node)
+      ) {
+        setFilterDropdownOpen(false);
+      }
+    };
+    if (filterDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [filterDropdownOpen]);
+
+  // Pagination Collision Detection
+  const paginationContainerRef = useRef<HTMLDivElement>(null);
+  const countRef = useRef<HTMLDivElement>(null);
+  const paginationControlsRef = useRef<HTMLDivElement>(null);
+  const countWidthRef = useRef<number>(180);
+  const controlsWidthRef = useRef<number>(470);
+  const [isPaginationStacked, setIsPaginationStacked] = useState(false);
+
+  // Filtered and sorted articles
   const filteredArticles = useMemo(() => {
-    return ALL_ARTICLES.filter((article) => {
+    const list = articles.filter((article) => {
       const matchesSearch =
         article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         article.category.toLowerCase().includes(searchQuery.toLowerCase());
@@ -123,7 +135,57 @@ export default function ArticleCatalogPage() {
         selectedCategory === "Semua" || article.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, selectedCategory]);
+
+    // Sort by timestamp (terbaru = descending, terlama = ascending)
+    return list.sort((a, b) => {
+      if (selectedSort === "terlama") {
+        return a.timestamp - b.timestamp;
+      }
+      return b.timestamp - a.timestamp;
+    });
+  }, [articles, searchQuery, selectedCategory, selectedSort]);
+
+  // Check 24px collision between item count and pagination controls
+  useEffect(() => {
+    const checkPaginationCollision = () => {
+      const container = paginationContainerRef.current;
+      const count = countRef.current;
+      const controls = paginationControlsRef.current;
+      if (!container) return;
+
+      if (count && count.offsetWidth > 0 && !isPaginationStacked) {
+        countWidthRef.current = count.offsetWidth;
+      }
+      if (controls && controls.offsetWidth > 0 && !isPaginationStacked) {
+        controlsWidthRef.current = controls.offsetWidth;
+      }
+
+      const containerW = container.clientWidth;
+      const countW = countWidthRef.current || 180;
+      const controlsW = controlsWidthRef.current || 470;
+      const GAP = 24; // 24px gap threshold before colliding
+
+      setIsPaginationStacked(containerW < countW + GAP + controlsW);
+    };
+
+    checkPaginationCollision();
+
+    const ro = new ResizeObserver(checkPaginationCollision);
+    if (paginationContainerRef.current) ro.observe(paginationContainerRef.current);
+    window.addEventListener("resize", checkPaginationCollision);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", checkPaginationCollision);
+    };
+  }, [isPaginationStacked, filteredArticles.length]);
+
+  const ITEMS_PER_PAGE = 8;
+  const totalPages = Math.ceil(filteredArticles.length / ITEMS_PER_PAGE) || 1;
+  const paginatedArticles = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredArticles.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredArticles, currentPage]);
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center">
@@ -144,10 +206,10 @@ export default function ArticleCatalogPage() {
             </h1>
           </div>
 
-          {/* Search & Filter Controls */}
-          <div className="w-full lg:w-auto flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
-            {/* Search Input Box */}
-            <div className="w-full sm:w-80 flex flex-col justify-start items-start gap-1">
+          {/* Search & Filter Controls — expands to full width when under the heading (< lg) */}
+          <div className="w-full lg:w-auto flex-1 lg:flex-initial flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+            {/* Search Input Box — full width when under the heading */}
+            <div className="w-full flex-1 lg:w-80 lg:flex-initial flex flex-col justify-start items-start gap-1">
               <label
                 htmlFor="article-search"
                 className="text-slate-900 text-sm font-semibold font-sans"
@@ -156,7 +218,7 @@ export default function ArticleCatalogPage() {
               </label>
               <div
                 data-hover-target="true"
-                className="w-full h-12 px-4 py-2.5 bg-brand-background rounded-[120px] inline-flex items-center gap-2.5 border border-transparent hover:border-g1/20 focus-within:ring-1 focus-within:ring-g1 transition-all cursor-text"
+                className="search-input-box w-full h-12 px-4 py-2.5 bg-brand-background rounded-[120px] inline-flex items-center gap-2.5 cursor-text"
               >
                 <LordIcon
                   name="Search"
@@ -188,41 +250,100 @@ export default function ArticleCatalogPage() {
               </div>
             </div>
 
-            {/* Filter Button / Dropdown */}
-            <div className="relative">
+            {/* Filter Button / Pop-up Dialog */}
+            <div ref={filterContainerRef} className="relative shrink-0">
               <Button
                 type="button"
                 text={
-                  selectedCategory === "Semua"
-                    ? "Pilih Filter"
-                    : selectedCategory
+                  selectedCategory !== "Semua"
+                    ? selectedCategory
+                    : selectedSort === "terlama"
+                    ? "Artikel Terlama"
+                    : "Pilih Filter"
                 }
                 variant="unique-green"
                 rightIcon="Figures"
-                onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+                onClick={handleOpenFilter}
                 className="w-full sm:w-auto shadow-none [&_.pill-segment]:shadow-none cursor-pointer"
               />
 
-              {/* Filter Dropdown Menu */}
+              {/* Filter Pop-up Modal Panel */}
               {filterDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 p-2 bg-white rounded-2xl shadow-lg border border-slate-100 z-30 flex flex-col gap-1">
-                  {FILTER_CATEGORIES.map((cat) => (
-                    <button
-                      key={cat}
+                <div className="filter-popup-modal absolute right-0 top-[calc(100%+8px)] w-80 sm:w-96 p-5 bg-white rounded-3xl shadow-xs z-30 flex flex-col gap-4 items-start text-left animate-fade-in">
+                  {/* Pop-up Header */}
+                  <div className="w-full pb-3 border-b border-white-70 text-left">
+                    <span className="text-dark text-base font-bold font-sans text-left">
+                      Filter Artikel
+                    </span>
+                  </div>
+
+                  {/* Section 1: Kategori Artikel (Single select) */}
+                  <div className="w-full flex flex-col items-start gap-2 text-left">
+                    <span className="text-dark/60 text-xs font-medium font-sans tracking-wider uppercase text-left">
+                      KATEGORI
+                    </span>
+                    <div className="flex flex-wrap gap-1.5 justify-start">
+                      {categories.map((cat) => {
+                        const isSelected = tempCategory === cat;
+                        return (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => setTempCategory(cat)}
+                            className={`filter-category-btn px-3.5 py-1.5 rounded-full text-xs font-semibold font-sans ${
+                              isSelected ? "is-active" : ""
+                            }`}
+                          >
+                            {cat}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Section 2: Urutkan Berdasarkan (Sort: Terbaru / Terlama — styled like What We Do tabs) */}
+                  <div className="w-full flex flex-col items-start gap-2 text-left">
+                    <span className="text-dark/60 text-xs font-medium font-sans tracking-wider uppercase text-left">
+                      URUTKAN
+                    </span>
+                    <div className="inline-flex items-center gap-2 justify-start">
+                      <button
+                        type="button"
+                        onClick={() => setTempSort("terbaru")}
+                        className={`filter-sort-btn px-4 py-2 rounded-full text-xs font-semibold font-sans ${
+                          tempSort === "terbaru" ? "is-active" : ""
+                        }`}
+                      >
+                        Artikel Terbaru
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTempSort("terlama")}
+                        className={`filter-sort-btn px-4 py-2 rounded-full text-xs font-semibold font-sans ${
+                          tempSort === "terlama" ? "is-active" : ""
+                        }`}
+                      >
+                        Artikel Terlama
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Pop-up Footer: Apply Filter Button */}
+                  <div className="w-full pt-2">
+                    <Button
                       type="button"
+                      text="Terapkan Filter"
+                      variant="unique-green"
+                      rightIcon="Right 1"
                       onClick={() => {
-                        setSelectedCategory(cat);
+                        setSelectedCategory(tempCategory);
+                        setSelectedSort(tempSort);
                         setFilterDropdownOpen(false);
                         setCurrentPage(1);
                       }}
-                      className={`w-full px-3 py-2 text-left text-sm font-sans rounded-xl transition-all cursor-pointer ${selectedCategory === cat
-                          ? "bg-g1 text-white font-semibold"
-                          : "text-slate-700 hover:bg-slate-100"
-                        }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
+                      className="w-full justify-center shadow-none [&_.pill-segment]:shadow-none cursor-pointer"
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -232,10 +353,10 @@ export default function ArticleCatalogPage() {
         {/* G1 Divider */}
         <div className="w-full h-px bg-g1/10" />
 
-        {/* Articles Grid (8 cards) */}
-        {filteredArticles.length > 0 ? (
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-            {filteredArticles.map((article, index) => (
+        {/* Articles Grid — collapses into centered stack with 24px gap */}
+        {paginatedArticles.length > 0 ? (
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch justify-items-center">
+            {paginatedArticles.map((article, index) => (
               <ArticleCard
                 key={article.id || index}
                 imageSrc={article.imageSrc}
@@ -244,88 +365,108 @@ export default function ArticleCatalogPage() {
                 title={article.title}
                 date={article.date}
                 href={article.href}
+                className="max-w-md sm:max-w-none w-full"
               />
             ))}
           </div>
         ) : (
-          <div className="w-full py-16 flex flex-col items-center justify-center text-center gap-2 bg-brand-background rounded-3xl">
-            <LordIcon name="Search" size={48} primaryColor="#0A9863" />
-            <p className="text-slate-900 text-lg font-bold font-sans">
-              Artikel Tidak Ditemukan
-            </p>
-            <p className="text-slate-500 text-sm font-sans max-w-md">
-              Tidak ada artikel yang cocok dengan kata kunci atau filter yang
-              Anda pilih.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedCategory("Semua");
-              }}
-              className="mt-2 text-g1 font-semibold text-sm hover:underline cursor-pointer"
-            >
-              Reset Filter
-            </button>
-          </div>
+          <EmptyState
+            iconName="StorageBox"
+            text={
+              searchQuery || selectedCategory !== "Semua"
+                ? "Tidak ada artikel yang cocok dengan pencarian atau filter yang dipilih."
+                : "Belum ada artikel yang dapat ditampilkan saat ini."
+            }
+          >
+            {(searchQuery || selectedCategory !== "Semua") && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("Semua");
+                  setSelectedSort("terbaru");
+                  setCurrentPage(1);
+                }}
+                className="text-g1 font-semibold text-sm hover:underline cursor-pointer"
+              >
+                Reset Filter
+              </button>
+            )}
+          </EmptyState>
         )}
 
         {/* Bottom Bar: Showing Count & Pagination Controls */}
-        <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 pt-2">
-          {/* Item Count Display */}
-          <div className="text-slate-900/60 text-sm font-normal font-sans">
-            Menampilkan{" "}
-            <span className="text-g1 text-sm font-semibold font-sans">
-              {filteredArticles.length}
-            </span>{" "}
-            dari{" "}
-            <span className="text-g1 text-sm font-semibold font-sans">
-              24 Artikel
-            </span>
-          </div>
-
-          {/* Pagination Controls */}
-          <div className="flex items-center gap-4 sm:gap-6 flex-wrap justify-center">
-            {/* Previous Button */}
-            <Button
-              type="button"
-              text="Sebelumnya"
-              variant="unique-stroke"
-              leftIcon="Left 1"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="cursor-pointer shadow-none [&_.pill-segment]:shadow-none"
-            />
-
-            {/* Page Number Pills */}
-            <div className="flex items-center gap-2">
-              {[1, 2, 3].map((page) => (
-                <button
-                  key={page}
-                  type="button"
-                  onClick={() => setCurrentPage(page)}
-                  className={`size-8 rounded-full flex items-center justify-center text-sm font-semibold font-sans transition-all cursor-pointer ${currentPage === page
-                      ? "bg-g1 text-white shadow-xs"
-                      : "text-g1 hover:bg-g1/10"
-                    }`}
-                >
-                  {page}
-                </button>
-              ))}
+        {filteredArticles.length > 0 && (
+          <div
+            ref={paginationContainerRef}
+            className={`w-full flex ${
+              isPaginationStacked
+                ? "flex-col items-center gap-6"
+                : "flex-row justify-between items-center gap-4"
+            } pt-2 transition-all`}
+          >
+            {/* Item Count Display — centered when stacked */}
+            <div
+              ref={countRef}
+              className={`text-slate-900/60 text-sm font-normal font-sans shrink-0 ${
+                isPaginationStacked ? "text-center w-full" : "text-left"
+              }`}
+            >
+              Menampilkan{" "}
+              <span className="text-g1 text-sm font-semibold font-sans">
+                {filteredArticles.length}
+              </span>{" "}
+              Artikel
             </div>
 
-            {/* Next Button */}
-            <Button
-              type="button"
-              text="Selanjutnya"
-              variant="unique-green"
-              rightIcon="Right 1"
-              disabled={currentPage === 3}
-              onClick={() => setCurrentPage((p) => Math.min(3, p + 1))}
-              className="cursor-pointer shadow-none [&_.pill-segment]:shadow-none"
-            />
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div
+                ref={paginationControlsRef}
+                className={`flex items-center gap-3 sm:gap-6 flex-wrap justify-center ${
+                  isPaginationStacked ? "w-full" : "shrink-0"
+                }`}
+              >
+                <Button
+                  type="button"
+                  text="Sebelumnya"
+                  variant="unique-stroke"
+                  leftIcon="Left 1"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="cursor-pointer shadow-none [&_.pill-segment]:shadow-none"
+                />
+
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                    <button
+                      key={pageNum}
+                      type="button"
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`size-8 rounded-full flex items-center justify-center text-sm font-semibold font-sans transition-all duration-150 cursor-pointer ${
+                        currentPage === pageNum
+                          ? "bg-g1 text-white shadow-xs"
+                          : "bg-transparent text-dark/70 hover:bg-g1/10 hover:text-g1"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+                </div>
+
+                <Button
+                  type="button"
+                  text="Selanjutnya"
+                  variant="unique-stroke"
+                  rightIcon="Right 1"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className="cursor-pointer shadow-none [&_.pill-segment]:shadow-none"
+                />
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </main>
 
       {/* Footer Section */}

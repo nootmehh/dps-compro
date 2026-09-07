@@ -42,9 +42,9 @@ export default function About({
       style={{
         border: isMediaHovered ? "1.5px solid var(--g1, #0A9863)" : "1.5px solid transparent",
       }}
-      className="group w-full lg:w-auto p-4 sm:p-5 bg-brand-background rounded-[48px] inline-flex flex-col justify-start items-start gap-2.5 shrink-0 transition-all duration-200 cursor-pointer"
+      className="group w-fit max-w-full p-4 sm:p-5 bg-brand-background rounded-[48px] inline-flex flex-col justify-start items-start gap-2.5 shrink-0 transition-all duration-200 cursor-pointer mx-auto min-[1020px]:mx-0 self-center min-[1020px]:self-auto"
     >
-      <div className="w-full sm:w-120 lg:w-130 h-72 sm:h-80 rounded-4xl overflow-hidden bg-stone-200/50 transition-all duration-200">
+      <div className="w-[min(calc(100vw-80px),480px)] sm:w-120 min-[1020px]:w-130 h-56 sm:h-72 min-[1020px]:h-80 rounded-4xl overflow-hidden bg-stone-200/50 transition-all duration-200">
         <img
           src={imageSrc}
           alt="520 x 320"
@@ -55,9 +55,9 @@ export default function About({
   );
 
   const contentBlock = (
-    <div className="w-full max-w-129.5 flex flex-col justify-start items-start gap-6">
+    <div className="w-full max-w-none min-[1020px]:max-w-129.5 mx-0 flex flex-col justify-start items-start text-left gap-6">
       {/* Header Block */}
-      <div className="self-stretch flex flex-col justify-start items-start gap-1">
+      <div className="self-stretch flex flex-col justify-start items-start text-left gap-1">
         <span className="text-dark/60 text-sm font-normal font-sans tracking-wider uppercase">
           {tagline}
         </span>
@@ -66,7 +66,7 @@ export default function About({
         </h2>
       </div>
 
-      {/* Description Body */}
+      {/* Description Body (Justified left & right) */}
       <div className="self-stretch text-dark/60 text-sm font-normal font-sans leading-relaxed text-justify space-y-3">
         {typeof description === "string" ? (
           <p className="whitespace-pre-line">{description}</p>
@@ -129,7 +129,7 @@ export default function About({
       aria-label="Tentang Kami Section"
       className={`w-full bg-linear-to-b from-white to-white-90 rounded-b-[48px] border-b border-white-70 py-10 md:py-14 overflow-hidden ${className}`}
     >
-      <div className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto flex flex-col lg:flex-row justify-between items-center gap-10 lg:gap-12">
+      <div className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto flex flex-col min-[1020px]:flex-row justify-between items-start min-[1020px]:items-center gap-10 min-[1020px]:gap-12">
         {layout === "reversed" ? (
           <>
             {contentBlock}

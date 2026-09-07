@@ -1,12 +1,15 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import Badge, { type BadgeVariant } from "@/components/ui/badge";
 import Button from "@/components/ui/button";
 import LordIcon from "@/components/common/lordIcon";
+import EmptyState from "@/components/common/emptyState";
+import { getArticleById, getArticles, getArticleSlug } from "@/api/articles";
+import type { Article } from "@/types/database";
 
 interface RelatedArticle {
   id: string | number;
@@ -17,34 +20,29 @@ interface RelatedArticle {
   href: string;
 }
 
-const RELATED_ARTICLES: RelatedArticle[] = [
-  {
-    id: 1,
-    imageSrc: "https://placehold.co/80x80",
-    category: "Proyek & Infrastruktur",
-    categoryVariant: "amber",
-    title: "Penyelesaian Proyek Marka Jalan Tol Cipali Selesai Lebih Awal",
-    href: "/artikel/proyek-tol-cipali",
-  },
-  {
-    id: 2,
-    imageSrc: "https://placehold.co/80x80",
-    category: "Tanggung Jawab Sosial (CSR)",
-    categoryVariant: "green",
-    title:
-      "Program CSR: Revitalisasi Zona Selamat Sekolah (ZoSS) di Kota Depok",
-    href: "/artikel/csr-zoss-depok",
-  },
-  {
-    id: 3,
-    imageSrc: "https://placehold.co/80x80",
-    category: "Inovasi Produk",
-    categoryVariant: "sky",
-    title:
-      "Peluncuran Inovasi Cat Coldplastic Ramah Lingkungan Generasi Terbaru",
-    href: "/artikel/inovasi-coldplastic",
-  },
-];
+function getCategoryVariant(category?: string | null): BadgeVariant {
+  if (!category) return "pink";
+  const cat = category.toLowerCase();
+  if (cat.includes("marka") || cat.includes("bahan") || cat.includes("material")) return "amber";
+  if (cat.includes("keselamatan") || cat.includes("penghargaan") || cat.includes("pencapaian")) return "pink";
+  if (cat.includes("perlengkapan") || cat.includes("lalu lintas") || cat.includes("rambu")) return "blue";
+  if (cat.includes("mesin") || cat.includes("peralatan") || cat.includes("elektrikal")) return "gray";
+  return "green";
+}
+
+function formatDate(dateStr?: string): string {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
 
 function RelatedArticleCard({ item }: { item: RelatedArticle }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -89,8 +87,62 @@ export default function ArticleDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Unwrap Next.js 15+ async params
   const resolvedParams = use(params);
+  const [article, setArticle] = useState<Article | null>(null);
+  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      const data = await getArticleById(resolvedParams.id);
+      setArticle(data);
+
+      const all = await getArticles();
+      const filtered = all
+        .filter((a) => a.id !== data?.id && a.id !== resolvedParams.id)
+        .slice(0, 4)
+        .map((a) => ({
+          id: a.id,
+          imageSrc: "https://placehold.co/320x160",
+          category: a.category || "Artikel",
+          categoryVariant: getCategoryVariant(a.category),
+          title: a.title,
+          href: `/artikel/${getArticleSlug(a, all)}`,
+        }));
+      setRelatedArticles(filtered);
+      setLoading(false);
+    }
+    loadData();
+  }, [resolvedParams.id]);
+
+  if (!loading && !article) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center">
+        <Navbar variant="auto" />
+        <main className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto pt-32 pb-16 flex flex-col items-center gap-6">
+          <EmptyState
+            iconName="StorageBox"
+            text="Artikel yang Anda cari tidak ditemukan atau telah dihapus."
+          />
+          <Link href="/artikel">
+            <Button
+              type="button"
+              text="Kembali ke Katalog Artikel"
+              variant="unique-green"
+              rightIcon="Right 1"
+            />
+          </Link>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Parse paragraphs if content is present
+  const contentParagraphs = article?.content
+    ? article.content.split("\n\n").filter(Boolean)
+    : [];
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center">
@@ -98,7 +150,7 @@ export default function ArticleDetailPage({
       <Navbar variant="auto" />
 
       {/* Main Container */}
-      <main className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto pt-24 md:pt-28 pb-12 md:pb-16 flex flex-col justify-start items-start gap-3">
+      <main className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto pt-24 md:pt-28 pb-12 md:pb-16 flex flex-col justify-start items-start gap-[12px]">
         {/* Breadcrumb Row */}
         <nav
           aria-label="Breadcrumb"
@@ -106,7 +158,7 @@ export default function ArticleDetailPage({
         >
           <Link
             href="/"
-            className="text-dark/60 hover:text-g1 font-normal transition-colors"
+            className="breadcrumb-link inline-flex items-center"
           >
             Beranda
           </Link>
@@ -120,7 +172,7 @@ export default function ArticleDetailPage({
           </div>
           <Link
             href="/artikel"
-            className="text-dark/60 hover:text-g1 font-normal transition-colors"
+            className="breadcrumb-link inline-flex items-center"
           >
             Artikel
           </Link>
@@ -133,7 +185,7 @@ export default function ArticleDetailPage({
             />
           </div>
           <span className="text-g1 font-semibold truncate max-w-xs sm:max-w-md">
-            Detail Artikel
+            {article?.title || "Detail Artikel"}
           </span>
         </nav>
 
@@ -141,36 +193,34 @@ export default function ArticleDetailPage({
         <div className="w-full flex flex-col lg:flex-row justify-between items-start gap-8 lg:gap-12">
           {/* Left Column: Full Article Content */}
           <article className="flex-1 w-full flex flex-col justify-start items-start gap-6">
-            {/* Header: Title, Category Badge, Author & Date */}
+            {/* Header: Title, Category Badge & Date Badge */}
             <header className="w-full flex flex-col justify-start items-start gap-4">
-              <div className="flex items-center gap-2">
-                <Badge text="Penghargaan & Pencapaian" variant="pink" />
-              </div>
-
               <h1 className="w-full text-dark text-2xl sm:text-3xl lg:text-[32px] font-bold font-sans leading-tight">
-                Komitmen Terhadap Keselamatan, Perusahaan Raih Penghargaan Zero
-                Accident 2026
+                {article?.title || "Judul Artikel"}
               </h1>
 
-              <div className="w-full flex items-center gap-4 text-xs sm:text-sm text-dark/60 font-sans border-b border-gray-100 pb-4">
-                <div className="flex items-center gap-1.5">
-                  <LordIcon
-                    name="Phone"
-                    size={16}
-                    primaryColor="#0A9863"
-                    trigger="hover"
-                  />
-                  <span>Ditulis oleh: Tim Humas DPS</span>
-                </div>
-                <span>&bull;</span>
-                <div className="flex items-center gap-1.5">
+              <div className="w-full flex items-center gap-3 border-b border-gray-100 pb-4 flex-wrap">
+                {/* Category Badge */}
+                <Badge
+                  text={article?.category || "Artikel"}
+                  variant={getCategoryVariant(article?.category)}
+                />
+
+                {/* Upload Time Badge */}
+                <div
+                  data-hover-target="true"
+                  className="time-badge group h-7 px-2.5 py-1 bg-g1/5 hover:bg-g1/10 rounded-full inline-flex items-center gap-1.5 shrink-0 cursor-pointer select-none transition-colors"
+                >
                   <LordIcon
                     name="Clock"
                     size={16}
                     primaryColor="#0A9863"
                     trigger="hover"
+                    target=".time-badge"
                   />
-                  <span>10 Juli, 2026</span>
+                  <span className="text-g1 text-xs font-semibold font-sans">
+                    {formatDate(article?.created_at) || "Terbaru"}
+                  </span>
                 </div>
               </div>
             </header>
@@ -180,73 +230,23 @@ export default function ArticleDetailPage({
               <img
                 className="size-full object-cover"
                 src="https://placehold.co/780x414"
-                alt="Penghargaan Zero Accident 2026"
+                alt={article?.title || "Hero banner"}
               />
             </div>
 
             {/* Rich Article Prose Body */}
             <div className="w-full text-dark/80 text-sm sm:text-base font-normal font-sans leading-relaxed text-justify space-y-4">
-              <p>
-                <strong>JAKARTA</strong> &mdash; PT. Dua Putra Srikandi kembali
-                menorehkan prestasi membanggakan di bidang Keselamatan dan
-                Kesehatan Kerja (K3). Pada penganugerahan K3 Award Nasional yang
-                diselenggarakan oleh Kementerian Ketenagakerjaan Republik
-                Indonesia pada awal bulan ini, perusahaan berhasil meraih
-                penghargaan <strong>Zero Accident Award (Kecelakaan Nihil)</strong>{" "}
-                atas pencapaian operasional tanpa kecelakaan kerja selama lebih
-                dari 3 tahun berturut-turut.
-              </p>
-
-              <p>
-                Penghargaan bergengsi ini diserahkan langsung oleh perwakilan
-                pemerintah sebagai bentuk apresiasi atas dedikasi nyata manajemen
-                dan seluruh jajaran teknisi lapangan dalam menerapkan Sistem
-                Manajemen Keselamatan dan Kesehatan Kerja (SMK3) secara ketat,
-                konsisten, dan menyeluruh di setiap titik pelaksanaan proyek.
-              </p>
-
-              <h2 className="text-dark text-xl sm:text-2xl font-bold font-sans pt-4 pb-1">
-                Penerapan Standar K3 Ketat di Lapangan
-              </h2>
-
-              <p>
-                Dalam pengerjaan proyek-proyek kelengkapan jalan raya seperti
-                pengecatan marka jalan raya, pemasangan guardrail, hingga
-                instalasi rambu lalu lintas, risiko keselamatan kerja di area lalu
-                lintas aktif selalu menjadi prioritas utama. PT. Dua Putra
-                Srikandi menerapkan protokol pengamanan zona kerja berstandar
-                tinggi, termasuk penyediaan rambu peringatan kerja berjarak aman,
-                penggunaan Alat Pelindung Diri (APD) lengkap berdaya pantul tinggi
-                (fluorescent), serta penempatan traffic warden bersertifikat di
-                lapangan.
-              </p>
-
-              <p>
-                &ldquo;Penghargaan ini adalah bukti nyata komitmen kami bahwa
-                produktivitas tinggi, pengerjaan yang cepat, dan keselamatan
-                kerja dapat berjalan beriringan tanpa harus ada yang dikorbankan.
-                Kami sangat bangga dengan kedisiplinan seluruh elemen
-                perusahaan,&rdquo; ujar perwakilan manajemen.
-              </p>
-
-              <p>
-                Keberhasilan mempertahankan rekor Zero Accident ini sekaligus
-                semakin mengukuhkan posisi perusahaan sebagai mitra penyedia
-                bahan dan kontraktor jalan yang andal. Bagi kami, menjamin
-                keselamatan kerja bukan hanya soal kepatuhan terhadap regulasi
-                perundangan, melainkan juga sebuah jaminan langsung kepada para
-                klien—baik dari instansi Pemerintah, BUMN, BUMD, maupun
-                Swasta—bahwa setiap proyek akan dieksekusi secara efisien,
-                terukur, tepat waktu, dan bebas dari penundaan akibat insiden
-                kerja.
-              </p>
-
-              <p>
-                Ke depannya, perusahaan berkomitmen untuk terus berinovasi dalam
-                mengadopsi teknologi keselamatan terbaru dan secara rutin
-                meningkatkan kapasitas K3 para pekerja demi mewujudkan lingkungan
-                kerja yang 100% aman dan produktif.
-              </p>
+              {contentParagraphs.length > 0 ? (
+                contentParagraphs.map((para, idx) => (
+                  <p key={idx}>{para}</p>
+                ))
+              ) : article?.content ? (
+                <p>{article.content}</p>
+              ) : (
+                <p className="text-dark/50 italic">
+                  Konten artikel belum tersedia.
+                </p>
+              )}
             </div>
           </article>
 
@@ -260,25 +260,36 @@ export default function ArticleDetailPage({
               ARTIKEL LAINNYA
             </h2>
 
-            {/* Related Articles List */}
-            <div className="w-full flex flex-col gap-3">
-              {RELATED_ARTICLES.map((item) => (
-                <RelatedArticleCard key={item.id} item={item} />
-              ))}
-            </div>
+            {/* Related Articles List or Empty State */}
+            {relatedArticles.length > 0 ? (
+              <div className="w-full flex flex-col gap-3">
+                {relatedArticles.map((item) => (
+                  <RelatedArticleCard key={item.id} item={item} />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                iconName="StorageBox"
+                iconSize={48}
+                text="Belum ada artikel terkait yang ditampilkan."
+                className="py-6 px-2"
+              />
+            )}
 
-            {/* View More Button */}
-            <div className="w-full pt-1">
-              <Link href="/artikel" className="w-full flex">
-                <Button
-                  type="button"
-                  text="Lihat Lebih Banyak"
-                  variant="unique-green"
-                  rightIcon="Right 1"
-                  className="w-full justify-center shadow-none [&_.pill-segment]:shadow-none cursor-pointer"
-                />
-              </Link>
-            </div>
+            {/* View More Button (only if items exist) */}
+            {relatedArticles.length > 0 && (
+              <div className="w-full pt-1">
+                <Link href="/artikel" className="w-full flex">
+                  <Button
+                    type="button"
+                    text="Lihat Lebih Banyak"
+                    variant="unique-green"
+                    rightIcon="Right 1"
+                    className="w-full justify-center shadow-none [&_.pill-segment]:shadow-none cursor-pointer"
+                  />
+                </Link>
+              </div>
+            )}
           </aside>
         </div>
       </main>

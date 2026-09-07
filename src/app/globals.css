@@ -56,10 +56,15 @@
   --foreground: #110d31;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  overflow-x: clip;
 }
 
 lord-icon {
@@ -83,6 +88,95 @@ lord-icon {
 
 .nav-link-item:active {
   opacity: 0.25 !important;
+}
+
+/* Navbar hamburger button — unique-green-style opacity hover */
+.navbar-hamburger-btn {
+  transition: opacity 0.2s ease;
+}
+.navbar-hamburger-btn:hover {
+  opacity: 0.85;
+}
+.navbar-hamburger-btn:active {
+  opacity: 0.7;
+}
+
+/* Filter Pop-up Category & Sort Buttons (Guaranteed Hover & Active States) */
+.filter-category-btn {
+  background-color: var(--color-brand-background, #f8f4f0);
+  color: rgba(17, 13, 49, 0.75);
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+  cursor: pointer;
+  user-select: none;
+}
+.filter-category-btn:hover {
+  background-color: rgba(10, 152, 99, 0.12) !important;
+  color: #0a9863 !important;
+}
+.filter-category-btn.is-active {
+  background-color: #0a9863 !important;
+  color: #ffffff !important;
+  box-shadow: 0px 1px 3px rgba(6, 137, 81, 0.25);
+}
+.filter-category-btn.is-active:hover {
+  opacity: 0.85 !important;
+  background-color: #0a9863 !important;
+  color: #ffffff !important;
+}
+
+.filter-sort-btn {
+  background-color: transparent;
+  color: #0a9863;
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+  cursor: pointer;
+  user-select: none;
+}
+.filter-sort-btn:hover {
+  background-color: rgba(10, 152, 99, 0.12) !important;
+}
+.filter-sort-btn.is-active {
+  background-color: #0a9863 !important;
+  color: #ffffff !important;
+  box-shadow: 0px 1px 3px rgba(6, 137, 81, 0.25);
+}
+.filter-sort-btn.is-active:hover {
+  opacity: 0.85 !important;
+  background-color: #0a9863 !important;
+  color: #ffffff !important;
+}
+
+.filter-popup-modal {
+  border: 1.5px solid var(--white-70, #e9e9e9);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.filter-popup-modal:hover {
+  border-color: var(--g1, #0a9863) !important;
+}
+
+/* Search Input Box — crisp G1 outline on hover & focus */
+.search-input-box {
+  border: 1.5px solid transparent;
+  transition: border-color 0.2s ease;
+}
+.search-input-box:hover,
+.search-input-box:focus-within {
+  border-color: var(--g1, #0a9863) !important;
+}
+
+
+
+
+
+.breadcrumb-link {
+  color: rgba(17, 13, 49, 0.7);
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+  color: #0a9863 !important;
 }
 
 /* ==========================================================================
@@ -302,4 +396,27 @@ lord-icon {
   animation-play-state: paused;
 }
 
+/* ==========================================================================
+   Smooth Section Entrance Animation
+   ========================================================================== */
 
+.reveal-section {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-section.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-section {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

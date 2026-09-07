@@ -9,44 +9,63 @@ import PartnerSection from "@/components/sections/partnerSection";
 import ArticleSection from "@/components/sections/articleSection";
 import Testimonial from "@/components/sections/testimonial";
 import CtaSection from "@/components/sections/cta";
+import RevealSection from "@/components/common/revealSection";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center">
+    <div className="min-h-screen bg-white flex flex-col items-center w-full">
       {/* Fixed Sticky Navbar */}
       <Navbar variant="auto" />
 
       {/* 1. Hero Section */}
-      <div className="w-full">
+      <RevealSection className="w-full" delay={80}>
         <Hero />
-      </div>
+      </RevealSection>
 
       {/* 2. Why Choose Us (Key Metrics Bar) */}
-      <WhyChooseUs />
+      <RevealSection className="w-full">
+        <WhyChooseUs />
+      </RevealSection>
 
       {/* 3. About Us Section */}
-      <About />
+      <RevealSection className="w-full">
+        <About />
+      </RevealSection>
 
       {/* 4. What We Do (Products & Services Tab Section) */}
-      <WhatWeDo />
+      <RevealSection className="w-full">
+        <WhatWeDo />
+      </RevealSection>
 
       {/* 5. Gallery Section (Results of Our Work) */}
-      <GallerySection />
+      <RevealSection className="w-full">
+        <GallerySection />
+      </RevealSection>
 
       {/* 5b. Trusted Partners Section */}
-      <PartnerSection />
+      <RevealSection className="w-full">
+        <PartnerSection />
+      </RevealSection>
 
       {/* 6. Articles Section */}
-      <ArticleSection />
+      <RevealSection className="w-full">
+        <ArticleSection />
+      </RevealSection>
 
       {/* 7. Testimonials Section */}
-      <Testimonial />
+      <RevealSection className="w-full">
+        <Testimonial />
+      </RevealSection>
 
       {/* 8. Call to Action Banner */}
-      <CtaSection />
+      <RevealSection className="w-full">
+        <CtaSection />
+      </RevealSection>
 
       {/* 9. Footer Section */}
-      <Footer />
+      <RevealSection className="w-full">
+        <Footer />
+      </RevealSection>
     </div>
   );
 }

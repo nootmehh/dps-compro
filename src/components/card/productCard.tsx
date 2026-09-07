@@ -43,7 +43,7 @@ export default function ProductCard({
       style={{
         border: isHovered ? "1.5px solid var(--g1, #0A9863)" : "1.5px solid #e5e7eb",
       }}
-      className={`group h-full flex-1 min-w-60 max-w-full sm:max-w-[320px] lg:max-w-none bg-white rounded-3xl flex flex-col justify-between items-center overflow-hidden transition-all duration-200 select-none cursor-pointer ${className}`}
+      className={`group h-full w-full min-w-60 max-w-full sm:max-w-[340px] xl:max-w-none mx-auto bg-white rounded-3xl flex flex-col justify-between items-center overflow-hidden transition-all duration-200 select-none cursor-pointer ${className}`}
     >
       {/* Full-bleed Thumbnail: No top/left/right margins */}
       <div className="w-full h-36 sm:h-40 overflow-hidden shrink-0">
@@ -102,14 +102,14 @@ export default function ProductCard({
 
   if (href) {
     return (
-      <Link href={href} onClick={onDetailClick} className="flex-1 flex h-full">
+      <Link href={href} onClick={onDetailClick} className="w-full flex justify-center h-full">
         {cardContent}
       </Link>
     );
   }
 
   return (
-    <div onClick={onDetailClick} className="flex-1 flex h-full">
+    <div onClick={onDetailClick} className="w-full flex justify-center h-full">
       {cardContent}
     </div>
   );

@@ -1,7 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Button from "../ui/button";
 import ArticleCard, { ArticleCardProps } from "../card/articleCard";
+import EmptyState from "../common/emptyState";
+import { getArticles, getArticleSlug } from "@/api/articles";
 
 export interface ArticleItem extends Omit<ArticleCardProps, "className"> {
   id?: string | number;
@@ -15,47 +18,21 @@ export interface ArticleSectionProps {
   className?: string;
 }
 
-const DEFAULT_ARTICLES: ArticleItem[] = [
-  {
-    id: 1,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Penghargaan & Pencapaian",
-    categoryColor: "pink",
-    title:
-      "Komitmen Terhadap Keselamatan, Perusahaan Raih Penghargaan Zero Accident 2026",
-    date: "10 Juli, 2026",
-    href: "/artikel/zero-accident-2026",
-  },
-  {
-    id: 2,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Proyek & Infrastruktur",
-    categoryColor: "amber",
-    title: "Penyelesaian Proyek Marka Jalan Tol Cipali Selesai Lebih Awal",
-    date: "8 Juli, 2026",
-    href: "/artikel/proyek-tol-cipali",
-  },
-  {
-    id: 3,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Tanggung Jawab Sosial (CSR)",
-    categoryColor: "green",
-    title:
-      "Program CSR: Revitalisasi Zona Selamat Sekolah (ZoSS) di Kota Depok",
-    date: "6 Juli, 2026",
-    href: "/artikel/csr-zoss-depok",
-  },
-  {
-    id: 4,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Inovasi Produk",
-    categoryColor: "sky",
-    title:
-      "Peluncuran Inovasi Cat Coldplastic Ramah Lingkungan Generasi Terbaru",
-    date: "4 Juli, 2026",
-    href: "/artikel/inovasi-coldplastic",
-  },
-];
+function formatDate(dateStr?: string): string {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
+const DEFAULT_ARTICLES: ArticleItem[] = [];
 
 export default function ArticleSection({
   tagline = "ARTIKEL KAMI",
@@ -64,6 +41,27 @@ export default function ArticleSection({
   onViewMore,
   className = "",
 }: ArticleSectionProps) {
+  const [fetchedArticles, setFetchedArticles] = useState<ArticleItem[]>([]);
+
+  useEffect(() => {
+    if (articles.length === 0) {
+      getArticles({ limit: 4 }).then((data) => {
+        setFetchedArticles(
+          data.map((a) => ({
+            id: a.id,
+            imageSrc: "https://placehold.co/320x160",
+            category: a.category || "Artikel",
+            title: a.title,
+            date: formatDate(a.created_at),
+            href: `/artikel/${getArticleSlug(a, data)}`,
+          }))
+        );
+      });
+    }
+  }, [articles.length]);
+
+  const displayArticles = articles.length > 0 ? articles : fetchedArticles;
+
   return (
     <section
       aria-label="Article Section"
@@ -81,31 +79,42 @@ export default function ArticleSection({
             </h2>
           </div>
 
-          <Button
-            type="button"
-            text="Artikel Lainnya"
-            variant="unique-stroke"
-            rightIcon="Right 1"
-            onClick={onViewMore}
-            className="cursor-pointer shadow-none shrink-0"
-          />
+          {displayArticles.length > 0 && (
+            <Button
+              type="button"
+              text="Artikel Lainnya"
+              variant="unique-stroke"
+              rightIcon="Right 1"
+              onClick={onViewMore}
+              className="cursor-pointer shadow-none shrink-0"
+            />
+          )}
         </div>
 
-        {/* Article Cards Grid */}
-        <div className="self-stretch grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-          {articles.map((article, index) => (
-            <ArticleCard
-              key={article.id || index}
-              imageSrc={article.imageSrc}
-              category={article.category}
-              categoryColor={article.categoryColor}
-              title={article.title}
-              date={article.date}
-              href={article.href}
-              onReadMore={article.onReadMore}
-            />
-          ))}
-        </div>
+        {/* Article Cards Grid or Empty State */}
+        {displayArticles.length > 0 ? (
+          <div className="w-full flex justify-center">
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch justify-items-center max-w-[340px] sm:max-w-[688px] xl:max-w-none mx-auto">
+              {displayArticles.map((article, index) => (
+                <ArticleCard
+                  key={article.id || index}
+                  imageSrc={article.imageSrc}
+                  category={article.category}
+                  categoryColor={article.categoryColor}
+                  title={article.title}
+                  date={article.date}
+                  href={article.href}
+                  onReadMore={article.onReadMore}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <EmptyState
+            iconName="StorageBox"
+            text="Belum ada artikel yang dapat ditampilkan saat ini."
+          />
+        )}
       </div>
     </section>
   );

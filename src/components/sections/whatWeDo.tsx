@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductCard from "../card/productCard";
 import ServiceCard from "../card/serviceCard";
 import Button from "../ui/button";
+import EmptyState from "../common/emptyState";
+import { getProducts, getProductSlug } from "@/api/products";
+import { getServices, getServiceSlug } from "@/api/services";
 
 type TabType = "produk" | "layanan";
 
@@ -35,75 +38,17 @@ export interface WhatWeDoProps {
   className?: string;
 }
 
-const DEFAULT_PRODUCTS: WhatWeDoProduct[] = [
-  {
-    id: 1,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Bahan Marka Jalan",
-    categoryColor: "amber",
-    title: "Coldplastic Merk DPS (MMA Coldplastic Paint)",
-    href: "/produk/coldplastic-dps",
-  },
-  {
-    id: 2,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Bahan Marka Jalan",
-    categoryColor: "amber",
-    title: "Cat Thermoplastik (AASHTO M-249)",
-    href: "/produk/cat-thermoplastik",
-  },
-  {
-    id: 3,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Bahan Marka Jalan",
-    categoryColor: "amber",
-    title: "Glass Beads",
-    href: "/produk/glass-beads",
-  },
-  {
-    id: 4,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Fasilitas & Penerangan Jalan",
-    categoryColor: "blue",
-    title: "Rambu Lalu Lintas",
-    href: "/produk/rambu-lalu-lintas",
-  },
-];
+function getCategoryColor(category?: string | null): "amber" | "blue" | "green" | "gray" {
+  if (!category) return "green";
+  const cat = category.toLowerCase();
+  if (cat.includes("marka") || cat.includes("bahan") || cat.includes("material")) return "amber";
+  if (cat.includes("perlengkapan") || cat.includes("lalu lintas") || cat.includes("rambu")) return "blue";
+  if (cat.includes("mesin") || cat.includes("peralatan") || cat.includes("elektrikal")) return "gray";
+  return "green";
+}
 
-const DEFAULT_SERVICES: WhatWeDoService[] = [
-  {
-    id: 1,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Pengerjaan Jalan",
-    categoryColor: "green",
-    title: "Pengecatan Marka Jalan",
-    href: "/layanan/pengecatan-marka-jalan",
-  },
-  {
-    id: 2,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Pengerjaan Jalan",
-    categoryColor: "green",
-    title: "Pemasangan Guardrail & Pagar Pengaman",
-    href: "/layanan/guardrail",
-  },
-  {
-    id: 3,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Keselamatan Jalan",
-    categoryColor: "blue",
-    title: "Pemasangan Rambu Lalu Lintas",
-    href: "/layanan/rambu-lalin",
-  },
-  {
-    id: 4,
-    imageSrc: "https://placehold.co/246x134",
-    category: "Konstruksi",
-    categoryColor: "gray",
-    title: "Perbaikan & Pemeliharaan Jalan",
-    href: "/layanan/pemeliharaan-jalan",
-  },
-];
+const DEFAULT_PRODUCTS: WhatWeDoProduct[] = [];
+const DEFAULT_SERVICES: WhatWeDoService[] = [];
 
 export default function WhatWeDo({
   tagline = "APA YANG KAMI LAKUKAN?",
@@ -116,6 +61,48 @@ export default function WhatWeDo({
 }: WhatWeDoProps) {
   const [activeTab, setActiveTab] = useState<TabType>("layanan");
   const [hoveredTab, setHoveredTab] = useState<TabType | null>(null);
+
+  const [fetchedProducts, setFetchedProducts] = useState<WhatWeDoProduct[]>([]);
+  const [fetchedServices, setFetchedServices] = useState<WhatWeDoService[]>([]);
+
+  useEffect(() => {
+    if (products.length === 0) {
+      getProducts({ limit: 4 }).then((data) => {
+        setFetchedProducts(
+          data.map((p) => ({
+            id: p.id,
+            imageSrc:
+              p.highlight_img_url ||
+              (p.product_image_url && p.product_image_url[0]) ||
+              "https://placehold.co/320x160",
+            category: p.category || "Produk",
+            categoryColor: getCategoryColor(p.category),
+            title: p.title,
+            href: `/produk/${getProductSlug(p, data)}`,
+          }))
+        );
+      });
+    }
+    if (services.length === 0) {
+      getServices({ limit: 4 }).then((data) => {
+        setFetchedServices(
+          data.map((s) => ({
+            id: s.id,
+            imageSrc:
+              (s.service_image_url && s.service_image_url[0]) ||
+              "https://placehold.co/320x160",
+            category: s.category || "Layanan",
+            categoryColor: getCategoryColor(s.category),
+            title: s.title,
+            href: `/layanan/${getServiceSlug(s, data)}`,
+          }))
+        );
+      });
+    }
+  }, [products.length, services.length]);
+
+  const displayProducts = products.length > 0 ? products : fetchedProducts;
+  const displayServices = services.length > 0 ? services : fetchedServices;
 
   return (
     <section
@@ -175,54 +162,74 @@ export default function WhatWeDo({
           </div>
         </div>
 
-        {/* Cards Grid */}
+        {/* Cards Grid or Empty State */}
         <div className="self-stretch flex flex-col gap-6">
           {/* Product Cards */}
           {activeTab === "produk" && (
-            <div className="self-stretch grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-              {products.map((product, index) => (
-                <ProductCard
-                  key={product.id || index}
-                  imageSrc={product.imageSrc}
-                  category={product.category}
-                  categoryColor={product.categoryColor}
-                  title={product.title}
-                  href={product.href}
-                />
-              ))}
-            </div>
+            displayProducts.length > 0 ? (
+              <div className="w-full flex justify-center">
+                <div className="w-full grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch justify-items-center max-w-[340px] sm:max-w-[688px] xl:max-w-none mx-auto">
+                  {displayProducts.map((product, index) => (
+                    <ProductCard
+                      key={product.id || index}
+                      imageSrc={product.imageSrc}
+                      category={product.category}
+                      categoryColor={product.categoryColor}
+                      title={product.title}
+                      href={product.href}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <EmptyState
+                iconName="StorageBox"
+                text="Belum ada produk yang ditampilkan saat ini."
+              />
+            )
           )}
 
           {/* Service Cards */}
           {activeTab === "layanan" && (
-            <div className="self-stretch grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-              {services.map((service, index) => (
-                <ServiceCard
-                  key={service.id || index}
-                  imageSrc={service.imageSrc}
-                  category={service.category}
-                  categoryColor={service.categoryColor}
-                  title={service.title}
-                  href={service.href}
-                />
-              ))}
-            </div>
+            displayServices.length > 0 ? (
+              <div className="w-full flex justify-center">
+                <div className="w-full grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch justify-items-center max-w-[340px] sm:max-w-[688px] xl:max-w-none mx-auto">
+                  {displayServices.map((service, index) => (
+                    <ServiceCard
+                      key={service.id || index}
+                      imageSrc={service.imageSrc}
+                      category={service.category}
+                      categoryColor={service.categoryColor}
+                      title={service.title}
+                      href={service.href}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <EmptyState
+                iconName="StorageBox"
+                text="Belum ada layanan yang ditampilkan saat ini."
+              />
+            )
           )}
 
-          {/* Divider */}
-          <div className="self-stretch h-px bg-g1/10" />
-
-          {/* View More Button */}
-          <div className="flex justify-center">
-            <Button
-              type="button"
-              text={activeTab === "produk" ? "Lihat Produk Lainnya" : "Lihat Layanan Lainnya"}
-              variant="stroke"
-              rightIcon="Right 1"
-              onClick={activeTab === "produk" ? onViewMoreProducts : onViewMoreServices}
-              className="cursor-pointer shadow-none"
-            />
-          </div>
+          {/* Divider & View More Button */}
+          {((activeTab === "produk" && displayProducts.length > 0) || (activeTab === "layanan" && displayServices.length > 0)) && (
+            <>
+              <div className="self-stretch h-px bg-g1/10" />
+              <div className="flex justify-center">
+                <Button
+                  type="button"
+                  text={activeTab === "produk" ? "Lihat Produk Lainnya" : "Lihat Layanan Lainnya"}
+                  variant="stroke"
+                  rightIcon="Right 1"
+                  onClick={activeTab === "produk" ? onViewMoreProducts : onViewMoreServices}
+                  className="cursor-pointer shadow-none"
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </section>
