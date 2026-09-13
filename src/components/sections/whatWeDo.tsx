@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import ProductCard from "../card/productCard";
 import ServiceCard from "../card/serviceCard";
 import Button from "../ui/button";
@@ -36,6 +37,8 @@ export interface WhatWeDoProps {
   title?: string;
   products?: WhatWeDoProduct[];
   services?: WhatWeDoService[];
+  productsHref?: string;
+  servicesHref?: string;
   onViewMoreProducts?: () => void;
   onViewMoreServices?: () => void;
   className?: string;
@@ -49,6 +52,8 @@ export default function WhatWeDo({
   title = "Siap Dalam Jasa & Pengadaan",
   products = DEFAULT_PRODUCTS,
   services = DEFAULT_SERVICES,
+  productsHref = "/produk",
+  servicesHref = "/layanan",
   onViewMoreProducts,
   onViewMoreServices,
   className = "",
@@ -217,14 +222,18 @@ export default function WhatWeDo({
             <>
               <div className="self-stretch h-px bg-g1/10" />
               <div className="flex justify-center">
-                <Button
-                  type="button"
-                  text={activeTab === "produk" ? "Lihat Produk Lainnya" : "Lihat Layanan Lainnya"}
-                  variant="stroke"
-                  rightIcon="Right 1"
+                <Link
+                  href={activeTab === "produk" ? productsHref : servicesHref}
                   onClick={activeTab === "produk" ? onViewMoreProducts : onViewMoreServices}
-                  className="cursor-pointer shadow-none"
-                />
+                >
+                  <Button
+                    type="button"
+                    text={activeTab === "produk" ? "Lihat Produk Lainnya" : "Lihat Layanan Lainnya"}
+                    variant="stroke"
+                    rightIcon="Right 1"
+                    className="cursor-pointer shadow-none"
+                  />
+                </Link>
               </div>
             </>
           )}

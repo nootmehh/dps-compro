@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import Button from "../ui/button";
 import ArticleCard, { ArticleCardProps } from "../card/articleCard";
 import EmptyState from "../common/emptyState";
@@ -14,6 +15,7 @@ export interface ArticleSectionProps {
   tagline?: string;
   title?: string;
   articles?: ArticleItem[];
+  viewMoreHref?: string;
   onViewMore?: () => void;
   className?: string;
 }
@@ -38,6 +40,7 @@ export default function ArticleSection({
   tagline = "ARTIKEL KAMI",
   title = "Ikuti Perkembangan Terbaru Kami",
   articles = DEFAULT_ARTICLES,
+  viewMoreHref = "/artikel",
   onViewMore,
   className = "",
 }: ArticleSectionProps) {
@@ -81,14 +84,15 @@ export default function ArticleSection({
           </div>
 
           {displayArticles.length > 0 && (
-            <Button
-              type="button"
-              text="Artikel Lainnya"
-              variant="unique-stroke"
-              rightIcon="Right 1"
-              onClick={onViewMore}
-              className="cursor-pointer shadow-none shrink-0"
-            />
+            <Link href={viewMoreHref} onClick={onViewMore}>
+              <Button
+                type="button"
+                text="Artikel Lainnya"
+                variant="unique-stroke"
+                rightIcon="Right 1"
+                className="cursor-pointer shadow-none shrink-0"
+              />
+            </Link>
           )}
         </div>
 

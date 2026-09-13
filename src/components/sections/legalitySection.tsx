@@ -68,6 +68,18 @@ export default function LegalitySection({
     }
   }, [items, legality]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash === "#legalitas") {
+      const el = document.getElementById("legalitas");
+      if (el) {
+        const timer = setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 200);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, []);
+
   const rawItems = items || legality || siteContent?.legality;
 
   const displayItems: AccordionItemData[] = useMemo(() => {
@@ -116,8 +128,9 @@ export default function LegalitySection({
 
   return (
     <section
+      id="legalitas"
       aria-label="Legality Section"
-      className={`w-full bg-white py-12 md:py-16 overflow-hidden flex flex-col items-center ${className}`}
+      className={`w-full bg-white py-12 md:py-16 overflow-hidden flex flex-col items-center scroll-mt-24 md:scroll-mt-32 ${className}`}
     >
       <div className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto flex flex-col justify-start items-start gap-8">
         {/* Header Block */}

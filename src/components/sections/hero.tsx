@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import Button from "../ui/button";
 import { getSiteContent, isVideoUrl, formatWhatsAppUrl } from "@/api/siteContent";
 
@@ -8,6 +9,7 @@ export interface HeroProps {
   title?: string;
   subtitle?: string;
   readMoreText?: string;
+  readMoreHref?: string;
   contactText?: string;
   onReadMore?: () => void;
   onContact?: () => void;
@@ -21,6 +23,7 @@ export default function Hero({
   title = "Solusi Lengkap Konstruksi & Keselamatan Jalan.",
   subtitle = "Kami adalah penyedia bahan dan kontraktor terpercaya untuk proyek Pemerintah hingga Swasta dengan jaminan mutu dan ketepatan waktu.",
   readMoreText = "Baca Selengkapnya",
+  readMoreHref = "/tentang",
   contactText = "Hubungi Kami",
   onReadMore,
   onContact,
@@ -122,14 +125,16 @@ export default function Hero({
           {/* Action Buttons */}
           <div className="inline-flex flex-wrap justify-start items-center gap-3 pt-2">
             {/* Primary Action Button (Unique Green Pill) */}
-            <Button
-              type="button"
-              text={readMoreText}
-              variant="unique-green"
-              rightIcon="Right 1"
-              onClick={onReadMore}
-              className="cursor-pointer shadow-lg"
-            />
+            <Link href={readMoreHref}>
+              <Button
+                type="button"
+                text={readMoreText}
+                variant="unique-green"
+                rightIcon="Right 1"
+                onClick={onReadMore}
+                className="cursor-pointer shadow-lg"
+              />
+            </Link>
 
             {/* Secondary Action Button (Glass Pill) */}
             <Button

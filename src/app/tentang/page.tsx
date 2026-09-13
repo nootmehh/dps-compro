@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import About from "@/components/sections/about";
@@ -11,6 +12,35 @@ import Testimonial from "@/components/sections/testimonial";
 import CtaSection from "@/components/sections/cta";
 import RevealSection from "@/components/common/revealSection";
 import { getSiteContent } from "@/api/siteContent";
+
+export const metadata: Metadata = {
+  title: "Tentang Kami",
+  description:
+    "Profil PT. Dua Putra Srikandi - Kontraktor terpercaya spesialis pengecatan marka jalan, penyedia bahan, rambu lalu lintas, dan perlengkapan keselamatan jalan berstandar nasional.",
+  openGraph: {
+    title: "Tentang Kami | PT. Dua Putra Srikandi",
+    description:
+      "Profil PT. Dua Putra Srikandi - Kontraktor terpercaya spesialis pengecatan marka jalan, penyedia bahan, rambu lalu lintas, dan perlengkapan keselamatan jalan berstandar nasional.",
+    type: "website",
+    siteName: "PT. Dua Putra Srikandi",
+    locale: "id_ID",
+    images: [
+      {
+        url: "/dps-logo-default.png",
+        width: 1200,
+        height: 630,
+        alt: "Tentang PT. Dua Putra Srikandi",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tentang Kami | PT. Dua Putra Srikandi",
+    description:
+      "Profil PT. Dua Putra Srikandi - Kontraktor terpercaya spesialis pengecatan marka jalan, penyedia bahan, rambu lalu lintas, dan perlengkapan keselamatan jalan berstandar nasional.",
+    images: ["/dps-logo-default.png"],
+  },
+};
 
 export default async function TentangPage() {
   const siteContent = await getSiteContent();

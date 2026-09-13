@@ -64,3 +64,15 @@ export interface Service {
   edited_at: string;
   category_color?: string | null;
 }
+
+export interface SeoSettings {
+  id: string;
+  site_title_default: string;
+  meta_description_default: string;
+  keywords: string | null;
+  favicon_url: string | null;
+  ga_connected: boolean;
+  ga_measurement_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
