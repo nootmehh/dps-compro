@@ -1,25 +1,26 @@
 import { supabase } from "@/lib/supabase";
 
 export interface GalleryItem {
-  id?: string;
+  id?: string | number;
   url: string;
   title?: string;
   category?: string;
 }
 
 export interface TestimonialItem {
-  id?: string;
+  id?: string | number;
   name: string;
   role?: string;
   company?: string;
   content: string;
+  quote?: string;
   rating?: number;
   avatar_url?: string;
 }
 
 export interface SocialMediaItem {
   type: string;
-  link: string;
+  link?: string;
   url?: string;
 }
 
@@ -95,3 +96,41 @@ export function isVideoUrl(url?: string | null): boolean {
     clean.includes("video/mp4")
   );
 }
+
+/**
+ * Format a WhatsApp URL with a pre-filled default inquiry message
+ */
+export function formatWhatsAppUrl(
+  urlOrPhone?: string | null,
+  message: string = "Halo, Saya ingin mengajukan penawaran"
+): string {
+  const defaultBase = "https://wa.me/6281380646093";
+  if (!urlOrPhone || !urlOrPhone.trim()) {
+    return `${defaultBase}?text=${encodeURIComponent(message)}`;
+  }
+
+  const trimmed = urlOrPhone.trim();
+
+  // If already a full URL (wa.me, api.whatsapp.com, etc.)
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    try {
+      const parsedUrl = new URL(trimmed);
+      if (message) {
+        parsedUrl.searchParams.set("text", message);
+      }
+      return parsedUrl.toString();
+    } catch {
+      const separator = trimmed.includes("?") ? "&" : "?";
+      return message ? `${trimmed}${separator}text=${encodeURIComponent(message)}` : trimmed;
+    }
+  }
+
+  // If raw phone number e.g. "081380646093" or "+62 813 8064 6093"
+  let cleanNumber = trimmed.replace(/[^\d]/g, "");
+  if (cleanNumber.startsWith("0")) {
+    cleanNumber = "62" + cleanNumber.slice(1);
+  }
+  const base = cleanNumber ? `https://wa.me/${cleanNumber}` : defaultBase;
+  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+}
+

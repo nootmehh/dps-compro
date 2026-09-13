@@ -1,19 +1,23 @@
 "use client";
 
-import GalleryCard, { type GalleryCardProps } from "../card/galleryCard";
+import { useState, useEffect, useMemo } from "react";
+import GalleryCard from "../card/galleryCard";
+import { getSiteContent, type GalleryItem as ApiGalleryItem } from "@/api/siteContent";
 
-export interface GalleryItem extends GalleryCardProps {
+export interface GallerySectionItem extends Omit<Partial<ApiGalleryItem>, "id"> {
   id?: string | number;
+  imageSrc?: string;
+  location?: string;
 }
 
 export interface GallerySectionProps {
   tagline?: string;
   title?: string;
-  items?: GalleryItem[];
+  items?: GallerySectionItem[];
   className?: string;
 }
 
-const DEFAULT_GALLERY_ITEMS: GalleryItem[] = [
+const DEFAULT_GALLERY_ITEMS: GallerySectionItem[] = [
   {
     id: 1,
     imageSrc: "https://placehold.co/320x220",
@@ -48,12 +52,46 @@ const DEFAULT_GALLERY_ITEMS: GalleryItem[] = [
 
 export default function GallerySection({
   tagline = "DETAIL LEBIH",
-  title = "Berikut Hasil Pekerjaan Kami",
-  items = DEFAULT_GALLERY_ITEMS,
+  title,
+  items,
   className = "",
 }: GallerySectionProps) {
-  // Duplicate array 3 times for seamless infinite continuous ticker loop
-  const tickerItems = [...items, ...items, ...items];
+  const [dbTitle, setDbTitle] = useState<string | null>(title || null);
+  const [dbItems, setDbItems] = useState<GallerySectionItem[] | null>(items || null);
+
+  useEffect(() => {
+    if (title) setDbTitle(title);
+    if (items) setDbItems(items);
+
+    if (!title || !items) {
+      let isMounted = true;
+      getSiteContent().then((content) => {
+        if (isMounted && content) {
+          if (!title && content.more_title) {
+            setDbTitle(content.more_title);
+          }
+          if (!items && content.gallery && content.gallery.length > 0) {
+            setDbItems(content.gallery);
+          }
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [title, items]);
+
+  const displayTitle = dbTitle || "Berikut Hasil Pekerjaan Kami";
+  const activeItems = useMemo(() => {
+    if (dbItems && dbItems.length > 0) return dbItems;
+    return DEFAULT_GALLERY_ITEMS;
+  }, [dbItems]);
+
+  // Duplicate items sufficiently for continuous infinite ticker loop without empty space
+  const tickerItems = useMemo(() => {
+    const repeatCount = Math.max(3, Math.ceil(12 / activeItems.length));
+    return Array.from({ length: repeatCount }, () => activeItems).flat();
+  }, [activeItems]);
 
   return (
     <section
@@ -66,21 +104,20 @@ export default function GallerySection({
           {tagline}
         </span>
         <h2 className="text-white text-2xl sm:text-3xl font-bold font-sans">
-          {title}
+          {displayTitle}
         </h2>
       </div>
 
       {/* Ticker Container with Edge-to-Edge Full-Screen Track */}
       <div className="relative w-full overflow-hidden py-2">
-
         {/* Scrolling Ticker Track */}
         <div className="animate-ticker-right flex items-center gap-6">
           {tickerItems.map((item, index) => (
             <GalleryCard
               key={`${item.id || index}-${index}`}
-              imageSrc={item.imageSrc}
-              title={item.title}
-              location={item.location}
+              url={item.url || item.imageSrc}
+              title={item.title || "Proyek DPS"}
+              category={item.category || item.location}
             />
           ))}
         </div>

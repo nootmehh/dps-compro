@@ -1,27 +1,110 @@
 "use client";
 
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Button from "../ui/button";
 import IconButton from "../ui/iconButton";
 import LordIcon from "../common/lordIcon";
+import {
+  getSiteContent,
+  formatWhatsAppUrl,
+  type SiteContent,
+  type SocialMediaItem,
+} from "@/api/siteContent";
 
 export interface FooterProps {
   logoSrc?: string;
   phone?: string;
   email?: string;
   address?: string;
+  whatsappUrl?: string;
+  socialMedia?: SocialMediaItem[];
   onQuoteClick?: () => void;
   className?: string;
 }
 
+const DEFAULT_PHONE = "(+62) 813 8064 6093";
+const DEFAULT_EMAIL = "salesdps77@gmail.com";
+const DEFAULT_ADDRESS =
+  "Jl.Raya Pondok Petir RT.02/0, Pondok Petir Bojongsari Kota Depok , Jawa Barat – Indonesia";
+
 export default function Footer({
   logoSrc = "/dps-logo-icon.png",
-  phone = "(+62) 813 8064 6093",
-  email = "salesdps77@gmail.com",
-  address = "Jl.Raya Pondok Petir RT.02/0, Pondok Petir Bojongsari Kota Depok , Jawa Barat – Indonesia",
+  phone,
+  email,
+  address,
+  whatsappUrl,
+  socialMedia,
   onQuoteClick,
   className = "",
 }: FooterProps) {
+  const [siteContent, setSiteContent] = useState<SiteContent | null>(null);
+
+  useEffect(() => {
+    // If contact props or socialMedia are missing, fetch from Supabase
+    if (!phone || !email || !address || !whatsappUrl || !socialMedia) {
+      let isMounted = true;
+      getSiteContent().then((data) => {
+        if (isMounted && data) {
+          setSiteContent(data);
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [phone, email, address, whatsappUrl, socialMedia]);
+
+  const displayPhone = phone || siteContent?.phone || DEFAULT_PHONE;
+  const displayEmail = email || siteContent?.email || DEFAULT_EMAIL;
+  const displayAddress = address || siteContent?.address || DEFAULT_ADDRESS;
+  const cleanPhone = displayPhone.replace(/[^\d+]/g, "");
+
+  const displayWhatsapp = formatWhatsAppUrl(
+    whatsappUrl || siteContent?.whatsapp_url || displayPhone
+  );
+
+  // Derive active social media links directly from the social_media column
+  const rawSocialMedia = socialMedia || siteContent?.social_media;
+
+  const socialList = useMemo(() => {
+    if (!rawSocialMedia) return [];
+
+    let parsedList: SocialMediaItem[] = [];
+    if (Array.isArray(rawSocialMedia)) {
+      parsedList = rawSocialMedia;
+    } else if (typeof rawSocialMedia === "string") {
+      try {
+        parsedList = JSON.parse(rawSocialMedia);
+      } catch {
+        parsedList = [];
+      }
+    }
+
+    return parsedList
+      .filter((item) => item && (item.url || item.link))
+      .map((item, index) => {
+        const rawUrl = (item.url || item.link || "").trim();
+        const href =
+          rawUrl.startsWith("http://") ||
+          rawUrl.startsWith("https://") ||
+          rawUrl.startsWith("mailto:") ||
+          rawUrl.startsWith("tel:")
+            ? rawUrl
+            : `https://${rawUrl}`;
+
+        const config = getSocialMediaConfig(item.type);
+        return {
+          id: `social-${item.type || "item"}-${index}`,
+          href,
+          title: config.title,
+          icon: config.icon,
+          primaryColor: config.primaryColor,
+          secondaryColor: config.secondaryColor,
+        };
+      });
+  }, [rawSocialMedia]);
+
   const navLinks = [
     { label: "Beranda", href: "/" },
     { label: "Tentang", href: "/tentang" },
@@ -30,7 +113,13 @@ export default function Footer({
     { label: "Artikel", href: "/artikel" },
   ];
 
-  const cleanPhone = phone.replace(/[^\d+]/g, "");
+  const handleQuoteClick = () => {
+    if (onQuoteClick) {
+      onQuoteClick();
+    } else if (displayWhatsapp) {
+      window.open(displayWhatsapp, "_blank", "noopener,noreferrer");
+    }
+  };
 
   return (
     <footer
@@ -85,13 +174,13 @@ export default function Footer({
                   <LordIcon name="Phone" size={20} primaryColor="#FFFFFF" target="a" />
                 </span>
                 <span className="text-sm font-normal text-white-100 group-hover:opacity-80 transition-opacity">
-                  {phone}
+                  {displayPhone}
                 </span>
               </a>
 
               {/* Email Link */}
               <a
-                href={`mailto:${email}`}
+                href={`mailto:${displayEmail}`}
                 data-hover-target="true"
                 className="group inline-flex items-center gap-3 cursor-pointer select-none text-white-100 hover:text-white transition-colors"
               >
@@ -99,13 +188,13 @@ export default function Footer({
                   <LordIcon name="Email" size={20} primaryColor="#FFFFFF" target="a" />
                 </span>
                 <span className="text-sm font-normal text-white-100 group-hover:opacity-80 transition-opacity">
-                  {email}
+                  {displayEmail}
                 </span>
               </a>
 
               {/* Address Link */}
               <a
-                href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
+                href={`https://maps.google.com/?q=${encodeURIComponent(displayAddress)}`}
                 target="_blank"
                 rel="noreferrer"
                 data-hover-target="true"
@@ -115,7 +204,7 @@ export default function Footer({
                   <LordIcon name="Location" size={20} primaryColor="#FFFFFF" target="a" />
                 </span>
                 <p className="flex-1 leading-relaxed text-sm font-normal text-white-100 group-hover:opacity-80 transition-opacity">
-                  {address}
+                  {displayAddress}
                 </p>
               </a>
             </div>
@@ -143,40 +232,29 @@ export default function Footer({
 
             {/* Column 2: IKUTI KAMI & AKSI CEPAT (Stacked vertically) */}
             <div className="flex flex-col items-start gap-6">
-              {/* Follow Us Social Media Icons */}
-              <div className="flex flex-col gap-3">
-                <span className="text-white-70/70 text-sm font-sans tracking-widest uppercase">
-                  IKUTI KAMI
-                </span>
-                <div className="flex items-center gap-3">
-                  {/* Social 1: Instagram */}
-                  <IconButton
-                    icon="Image 2"
-                    href="https://instagram.com"
-                    target="_blank"
-                    title="Instagram"
-                    variant="fill"
-                  />
-
-                  {/* Social 2: Global / Website */}
-                  <IconButton
-                    icon="Global"
-                    href="https://duaputrasrikandi.com"
-                    target="_blank"
-                    title="Website Resmi"
-                    variant="fill"
-                  />
-
-                  {/* Social 3: WhatsApp / Contact */}
-                  <IconButton
-                    icon="Services"
-                    href="https://wa.me/6281380646093"
-                    target="_blank"
-                    title="WhatsApp"
-                    variant="fill"
-                  />
+              {/* Follow Us Social Media Icons (Render only when social media items exist) */}
+              {socialList.length > 0 && (
+                <div className="flex flex-col gap-3">
+                  <span className="text-white-70/70 text-sm font-sans tracking-widest uppercase">
+                    IKUTI KAMI
+                  </span>
+                  <div className="grid grid-cols-4 gap-3 w-fit">
+                    {socialList.map((social) => (
+                      <IconButton
+                        key={social.id}
+                        icon={social.icon}
+                        href={social.href}
+                        target="_blank"
+                        title={social.title}
+                        variant="fill"
+                        iconSize={28}
+                        iconColor={social.primaryColor}
+                        secondaryColor={social.secondaryColor}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Quick Action Button (Always under Ikuti Kami) */}
               <div className="flex flex-col gap-3">
@@ -188,7 +266,7 @@ export default function Footer({
                   text="Minta Penawaran Harga"
                   variant="unique-green"
                   rightIcon="Phone"
-                  onClick={onQuoteClick}
+                  onClick={handleQuoteClick}
                   className="cursor-pointer shadow-none [&_.pill-segment]:shadow-none whitespace-nowrap [&_.pill-segment]:whitespace-nowrap"
                 />
               </div>
@@ -206,3 +284,90 @@ export default function Footer({
     </footer>
   );
 }
+
+export function getSocialMediaConfig(type?: string | null) {
+  const clean = (type || "").toLowerCase().trim();
+
+  // TikTok, LinkedIn, and X use first color: white-100 (#FFFFFF), secondary: g1 (#0A9863)
+  // Others use first color: g1 (#0A9863), secondary: white-100 (#FFFFFF)
+  if (clean.includes("tik")) {
+    return {
+      icon: "/lord-icons/lineal/social-media/wired-flat-2546-logo-tiktok-hover-draw.json",
+      title: "TikTok",
+      primaryColor: "#FFFFFF",
+      secondaryColor: "#0A9863",
+    };
+  }
+  if (clean.includes("link")) {
+    return {
+      icon: "/lord-icons/lineal/social-media/wired-flat-2549-logo-linkedin-hover-draw.json",
+      title: "LinkedIn",
+      primaryColor: "#FFFFFF",
+      secondaryColor: "#0A9863",
+    };
+  }
+  if (clean === "x" || clean.includes("twit")) {
+    return {
+      icon: "/lord-icons/lineal/social-media/wired-flat-2714-logo-x-hover-pinch.json",
+      title: "X (Twitter)",
+      primaryColor: "#FFFFFF",
+      secondaryColor: "#0A9863",
+    };
+  }
+  if (clean.includes("insta") || clean === "ig") {
+    return {
+      icon: "/lord-icons/lineal/social-media/wired-flat-2626-logo-circle-instagram-hover-roll.json",
+      title: "Instagram",
+      primaryColor: "#0A9863",
+      secondaryColor: "#FFFFFF",
+    };
+  }
+  if (clean.includes("face") || clean === "fb") {
+    return {
+      icon: "/lord-icons/lineal/social-media/wired-flat-2624-logo-circle-facebook-hover-pinch.json",
+      title: "Facebook",
+      primaryColor: "#0A9863",
+      secondaryColor: "#FFFFFF",
+    };
+  }
+  if (clean.includes("you") || clean === "yt") {
+    return {
+      icon: "/lord-icons/lineal/social-media/wired-flat-2547-logo-youtube-hover-pinch.json",
+      title: "YouTube",
+      primaryColor: "#0A9863",
+      secondaryColor: "#FFFFFF",
+    };
+  }
+  if (clean.includes("thread")) {
+    return {
+      icon: "/lord-icons/lineal/social-media/wired-flat-2668-logo-circle-threads-hover-draw.json",
+      title: "Threads",
+      primaryColor: "#0A9863",
+      secondaryColor: "#FFFFFF",
+    };
+  }
+  if (clean.includes("what") || clean === "wa") {
+    return {
+      icon: "Phone",
+      title: "WhatsApp",
+      primaryColor: "#0A9863",
+      secondaryColor: "#FFFFFF",
+    };
+  }
+  if (clean.includes("web") || clean.includes("site") || clean.includes("glob")) {
+    return {
+      icon: "Global",
+      title: "Website Resmi",
+      primaryColor: "#0A9863",
+      secondaryColor: "#FFFFFF",
+    };
+  }
+
+  return {
+    icon: "Global",
+    title: type ? type.charAt(0).toUpperCase() + type.slice(1) : "Social Media",
+    primaryColor: "#0A9863",
+    secondaryColor: "#FFFFFF",
+  };
+}
+

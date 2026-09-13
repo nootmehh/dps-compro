@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Badge, { type BadgeVariant } from "../ui/badge";
+import Badge, { type BadgeVariant, resolveBadgeVariant } from "../ui/badge";
 import LordIcon from "../common/lordIcon";
 
 export interface ProductCardProps {
@@ -19,7 +19,7 @@ export interface ProductCardProps {
 export default function ProductCard({
   imageSrc = "https://placehold.co/320x160",
   category = "Bahan Marka Jalan",
-  categoryVariant = "amber",
+  categoryVariant,
   categoryColor,
   title,
   href = "/produk/1",
@@ -31,9 +31,7 @@ export default function ProductCard({
   // Map categoryColor string to BadgeVariant if provided
   const badgeVar: BadgeVariant =
     categoryVariant ||
-    (categoryColor === "amber" || categoryColor === "yellow"
-      ? "amber"
-      : "green");
+    resolveBadgeVariant(categoryColor, category, "green");
 
   const cardContent = (
     <div

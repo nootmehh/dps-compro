@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Badge, { type BadgeVariant } from "../ui/badge";
+import Badge, { type BadgeVariant, resolveBadgeVariant } from "../ui/badge";
 import LordIcon from "../common/lordIcon";
 
 export interface ArticleCardProps {
@@ -20,7 +20,7 @@ export interface ArticleCardProps {
 export default function ArticleCard({
   imageSrc = "https://placehold.co/320x160",
   category = "Keselamatan Jalan",
-  categoryVariant = "green",
+  categoryVariant,
   categoryColor,
   title,
   date = "22 Jan 2026",
@@ -33,13 +33,7 @@ export default function ArticleCard({
   // Map categoryColor string to BadgeVariant if provided
   const badgeVar: BadgeVariant =
     categoryVariant ||
-    (categoryColor === "amber" || categoryColor === "yellow"
-      ? "amber"
-      : categoryColor === "blue"
-      ? "blue"
-      : categoryColor === "red"
-      ? "red"
-      : "green");
+    resolveBadgeVariant(categoryColor, category, "green");
 
   return (
     <Link href={href} onClick={onReadMore} className="w-full flex justify-center h-full">

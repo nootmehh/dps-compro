@@ -11,14 +11,15 @@ export type BadgeVariant =
   | "amber"
   | "sky";
 
-interface BadgeProps {
+export interface BadgeProps {
   text: string;
   variant?: BadgeVariant;
+  categoryColor?: string | null;
   className?: string;
   showDot?: boolean;
 }
 
-const variantClasses: Record<
+export const variantClasses: Record<
   BadgeVariant,
   { container: string; dot: string; text: string }
 > = {
@@ -79,13 +80,46 @@ const variantClasses: Record<
   },
 };
 
+/**
+ * Resolve any category_color string (e.g. "Green", "Purple", "amber")
+ * or fallback categoryName to a valid BadgeVariant.
+ */
+export function resolveBadgeVariant(
+  categoryColor?: string | null,
+  categoryName?: string | null,
+  fallback: BadgeVariant = "green"
+): BadgeVariant {
+  if (categoryColor && typeof categoryColor === "string") {
+    let clean = categoryColor.toLowerCase().trim();
+    if (clean === "grey") clean = "gray";
+    if (clean in variantClasses) {
+      return clean as BadgeVariant;
+    }
+  }
+
+  if (categoryName && typeof categoryName === "string") {
+    const cat = categoryName.toLowerCase().trim();
+    if (cat.includes("marka") || cat.includes("bahan") || cat.includes("material")) return "amber";
+    if (cat.includes("keselamatan") || cat.includes("penghargaan") || cat.includes("pencapaian")) return "pink";
+    if (cat.includes("perlengkapan") || cat.includes("lalu lintas") || cat.includes("rambu")) return "blue";
+    if (cat.includes("mesin") || cat.includes("peralatan") || cat.includes("elektrikal")) return "gray";
+  }
+
+  return fallback;
+}
+
 export default function Badge({
   text,
-  variant = "green",
+  variant,
+  categoryColor,
   className = "",
   showDot = true,
 }: BadgeProps) {
-  const selected = variantClasses[variant] || variantClasses.green;
+  const resolvedVariant =
+    variant ||
+    (categoryColor ? resolveBadgeVariant(categoryColor, text) : "green");
+
+  const selected = variantClasses[resolvedVariant] || variantClasses.green;
 
   return (
     <div

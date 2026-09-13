@@ -1,5 +1,3 @@
-"use client";
-
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import About from "@/components/sections/about";
@@ -12,12 +10,15 @@ import WhyChooseUs from "@/components/sections/whyChooseUs";
 import Testimonial from "@/components/sections/testimonial";
 import CtaSection from "@/components/sections/cta";
 import RevealSection from "@/components/common/revealSection";
+import { getSiteContent } from "@/api/siteContent";
 
-export default function TentangPage() {
+export default async function TentangPage() {
+  const siteContent = await getSiteContent();
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center w-full">
       {/* Sticky / Solid Navbar */}
-      <Navbar variant="auto" />
+      <Navbar variant="auto" whatsappUrl={siteContent?.whatsapp_url || undefined} />
 
       {/* Main Content Area */}
       <main className="w-full flex flex-col items-center">
@@ -26,31 +27,8 @@ export default function TentangPage() {
           <About
             tagline="TENTANG KAMI"
             title="Apa itu PT. Dua Putra Srikandi?"
-            description={
-              <>
-                <p>
-                  Berdiri sejak tahun 2020, kami adalah{" "}
-                  <span className="font-semibold text-dark/80">
-                    penyedia jasa kontraktor dan kelengkapan jalan yang terpercaya
-                  </span>
-                  . Dengan dukungan tenaga ahli profesional, kami berkomitmen
-                  menghadirkan produk bermutu tinggi, tepat waktu, dan berdaya
-                  saing untuk setiap proyek pelaksanaan maupun pengadaan Anda.
-                </p>
-                <p>
-                  Sebagai mitra strategis dalam pengembangan infrastruktur,
-                  portofolio layanan kami mencakup berbagai kebutuhan esensial
-                  keselamatan dan kelengkapan jalan. Kami melayani pengerjaan marka
-                  jalan, instalasi rambu lalu lintas, pemasangan guardrail (pagar
-                  pengaman), delineator, hingga penyediaan paku jalan dan
-                  Penerangan Jalan Umum (PJU). Seluruh material dan proses kerja
-                  yang kami aplikasikan selalu dipastikan memenuhi Standar Nasional
-                  Indonesia (SNI) serta regulasi spesifikasi teknis yang berlaku,
-                  demi menjamin durabilitas dan tingkat keamanan maksimal bagi para
-                  pengguna jalan.
-                </p>
-              </>
-            }
+            mediaUrl={siteContent?.about_image_url || undefined}
+            description={siteContent?.about_description_long || undefined}
             primaryButtonText="Lihat Layanan Kami"
             primaryButtonHref="/layanan"
             secondaryButtonText="Lihat Produk Kami"
@@ -62,23 +40,33 @@ export default function TentangPage() {
 
         {/* 2. Vision & Mission Section */}
         <RevealSection className="w-full">
-          <VisionMission />
+          <VisionMission
+            vision={siteContent?.vision}
+            mission={siteContent?.mission}
+            vision_img_url={siteContent?.vision_img_url}
+          />
         </RevealSection>
 
         {/* 3. Trusted Partners Section (White background, no py padding on Tentang page) */}
         <RevealSection className="w-full">
-          <PartnerSection className="bg-white border-b-0 py-0" />
+          <PartnerSection
+            partner_img_url={siteContent?.partner_img_url || undefined}
+            className="bg-white border-b-0 py-0"
+          />
         </RevealSection>
 
         {/* 4. Legality Accordion Section */}
         <RevealSection className="w-full">
-          <LegalitySection />
+          <LegalitySection legality={siteContent?.legality} />
         </RevealSection>
 
         {/* 5. Gallery Section */}
         <RevealSection className="w-full">
           <div className="w-full bg-linear-to-bl from-[#0BA86D] to-[#028151]">
-            <GallerySection />
+            <GallerySection
+              title={siteContent?.more_title || undefined}
+              items={siteContent?.gallery || undefined}
+            />
           </div>
         </RevealSection>
 
@@ -89,23 +77,35 @@ export default function TentangPage() {
 
         {/* 7. Why Choose Us Section (Brand background on Tentang page) */}
         <RevealSection className="w-full">
-          <WhyChooseUs className="bg-brand-background py-10 md:py-12 border-b border-gray-100" />
+          <WhyChooseUs
+            valueSatisfyCustomer={siteContent?.value_satisfy_customer}
+            valueFinishedServices={siteContent?.value_finished_services}
+            valueProductProduced={siteContent?.value_product_produced}
+            valueYearsExperience={siteContent?.value_years_experience}
+            className="bg-brand-background py-10 md:py-12 border-b border-gray-100"
+          />
         </RevealSection>
 
         {/* 8. Testimonials Section */}
         <RevealSection className="w-full">
-          <Testimonial />
+          <Testimonial testimonials={siteContent?.testimonials || undefined} />
         </RevealSection>
 
         {/* 9. CTA Banner (Bottom before footer) */}
         <RevealSection className="w-full">
-          <CtaSection />
+          <CtaSection whatsappUrl={siteContent?.whatsapp_url || undefined} />
         </RevealSection>
       </main>
 
       {/* Footer */}
       <RevealSection className="w-full">
-        <Footer />
+        <Footer
+          phone={siteContent?.phone || undefined}
+          email={siteContent?.email || undefined}
+          address={siteContent?.address || undefined}
+          whatsappUrl={siteContent?.whatsapp_url || undefined}
+          socialMedia={siteContent?.social_media || undefined}
+        />
       </RevealSection>
     </div>
   );

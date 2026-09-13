@@ -7,8 +7,9 @@ import ArticleCard from "@/components/card/articleCard";
 import Button from "@/components/ui/button";
 import LordIcon from "@/components/common/lordIcon";
 import EmptyState from "@/components/common/emptyState";
+import LoadingState from "@/components/common/loadingState";
 import { getArticles, getArticleSlug } from "@/api/articles";
-import type { BadgeVariant } from "@/components/ui/badge";
+import { type BadgeVariant, resolveBadgeVariant } from "@/components/ui/badge";
 
 interface ArticleItemData {
   id: string | number;
@@ -19,16 +20,6 @@ interface ArticleItemData {
   date: string;
   timestamp: number; // for chronological sorting
   href: string;
-}
-
-function getCategoryVariant(category?: string | null): BadgeVariant {
-  if (!category) return "pink";
-  const cat = category.toLowerCase();
-  if (cat.includes("marka") || cat.includes("bahan") || cat.includes("material")) return "amber";
-  if (cat.includes("keselamatan") || cat.includes("penghargaan") || cat.includes("pencapaian")) return "pink";
-  if (cat.includes("perlengkapan") || cat.includes("lalu lintas") || cat.includes("rambu")) return "blue";
-  if (cat.includes("mesin") || cat.includes("peralatan") || cat.includes("elektrikal")) return "gray";
-  return "green";
 }
 
 function formatDate(dateStr: string): string {
@@ -54,6 +45,7 @@ const DEFAULT_FILTER_CATEGORIES = [
 
 export default function ArticleCatalogPage() {
   const [articles, setArticles] = useState<ArticleItemData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>(DEFAULT_FILTER_CATEGORIES);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
@@ -69,24 +61,28 @@ export default function ArticleCatalogPage() {
 
   useEffect(() => {
     async function loadData() {
-      const data = await getArticles();
-      const mapped: ArticleItemData[] = data.map((a) => ({
-        id: a.id,
-        imageSrc: "https://placehold.co/320x160",
-        category: a.category || "Artikel",
-        categoryVariant: getCategoryVariant(a.category),
-        title: a.title,
-        date: formatDate(a.created_at),
-        timestamp: new Date(a.created_at).getTime(),
-        href: `/artikel/${getArticleSlug(a, data)}`,
-      }));
-      setArticles(mapped);
+      try {
+        const data = await getArticles();
+        const mapped: ArticleItemData[] = data.map((a) => ({
+          id: a.id,
+          imageSrc: "https://placehold.co/320x160",
+          category: a.category || "Artikel",
+          categoryVariant: resolveBadgeVariant(a.category_color, a.category, "green"),
+          title: a.title,
+          date: formatDate(a.created_at),
+          timestamp: new Date(a.created_at).getTime(),
+          href: `/artikel/${getArticleSlug(a, data)}`,
+        }));
+        setArticles(mapped);
 
-      const distinctCats = Array.from(
-        new Set(data.map((a) => a.category).filter(Boolean))
-      ) as string[];
-      if (distinctCats.length > 0) {
-        setCategories(["Semua", ...distinctCats]);
+        const distinctCats = Array.from(
+          new Set(data.map((a) => a.category).filter(Boolean))
+        ) as string[];
+        if (distinctCats.length > 0) {
+          setCategories(["Semua", ...distinctCats]);
+        }
+      } finally {
+        setLoading(false);
       }
     }
     loadData();
@@ -187,6 +183,10 @@ export default function ArticleCatalogPage() {
     return filteredArticles.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredArticles, currentPage]);
 
+  if (loading) {
+    return <LoadingState />;
+  }
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center">
       {/* Sticky Navbar */}
@@ -269,7 +269,7 @@ export default function ArticleCatalogPage() {
 
               {/* Filter Pop-up Modal Panel */}
               {filterDropdownOpen && (
-                <div className="filter-popup-modal absolute right-0 top-[calc(100%+8px)] w-80 sm:w-96 p-5 bg-white rounded-3xl shadow-xs z-30 flex flex-col gap-4 items-start text-left animate-fade-in">
+                <div className="filter-popup-modal absolute right-0 top-[calc(100%+8px)] w-80 sm:w-96 p-5 bg-white rounded-3xl shadow-none border border-slate-200 z-30 flex flex-col gap-4 items-start text-left animate-fade-in">
                   {/* Pop-up Header */}
                   <div className="w-full pb-3 border-b border-white-70 text-left">
                     <span className="text-dark text-base font-bold font-sans text-left">

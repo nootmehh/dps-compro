@@ -5,6 +5,7 @@ export interface Article {
   content: string | null;
   created_at: string;
   edited_at: string;
+  category_color?: string | null;
 }
 
 export interface ProductDetailItem {
@@ -36,6 +37,7 @@ export interface Product {
   highlight_img_url: string | null;
   created_at: string;
   edited_at: string;
+  category_color?: string | null;
 }
 
 export interface ServiceAdvantageItem {
@@ -60,4 +62,5 @@ export interface Service {
   service_image_url: string[] | null;
   created_at: string;
   edited_at: string;
+  category_color?: string | null;
 }

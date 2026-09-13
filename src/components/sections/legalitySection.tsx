@@ -1,22 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import Accordion from "../ui/accordion";
+import { useState, useEffect, useMemo } from "react";
+import Accordion, { type AccordionItemData } from "../ui/accordion";
+import { getSiteContent, type SiteContent, type LegalityItem } from "@/api/siteContent";
 
-export interface LegalityItem {
-  id: number;
-  question: string;
-  answer: string;
-}
+export type { LegalityItem };
 
 export interface LegalitySectionProps {
   tagline?: string;
   title?: string;
   items?: LegalityItem[];
+  legality?: LegalityItem[] | null;
   className?: string;
 }
 
-const DEFAULT_LEGALITY_ITEMS: LegalityItem[] = [
+const DEFAULT_LEGALITY_ITEMS: AccordionItemData[] = [
   {
     id: 1,
     question:
@@ -50,13 +48,70 @@ const DEFAULT_LEGALITY_ITEMS: LegalityItem[] = [
 export default function LegalitySection({
   tagline = "LEGALITAS KAMI",
   title = "Kelengkapan Legalitas Kami",
-  items = DEFAULT_LEGALITY_ITEMS,
+  items,
+  legality,
   className = "",
 }: LegalitySectionProps) {
-  const [activeId, setActiveId] = useState<number | null>(1);
+  const [siteContent, setSiteContent] = useState<SiteContent | null>(null);
 
-  const toggleItem = (id: number) => {
-    setActiveId(activeId === id ? null : id);
+  useEffect(() => {
+    if (!items && !legality) {
+      let isMounted = true;
+      getSiteContent().then((data) => {
+        if (isMounted && data) {
+          setSiteContent(data);
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [items, legality]);
+
+  const rawItems = items || legality || siteContent?.legality;
+
+  const displayItems: AccordionItemData[] = useMemo(() => {
+    if (!rawItems) return DEFAULT_LEGALITY_ITEMS;
+
+    let parsedList: LegalityItem[] = [];
+    if (Array.isArray(rawItems)) {
+      parsedList = rawItems;
+    } else if (typeof rawItems === "string") {
+      try {
+        parsedList = JSON.parse(rawItems);
+      } catch {
+        parsedList = [];
+      }
+    }
+
+    if (!parsedList || parsedList.length === 0) {
+      return DEFAULT_LEGALITY_ITEMS;
+    }
+
+    return parsedList
+      .filter((item) => item && item.question && item.answer)
+      .map((item, idx) => ({
+        id: item.id ?? idx + 1,
+        question: item.question,
+        answer: item.answer,
+      }));
+  }, [rawItems]);
+
+  const [activeId, setActiveId] = useState<string | number | null>(() => {
+    return displayItems[0]?.id ?? null;
+  });
+
+  useEffect(() => {
+    if (displayItems.length > 0) {
+      setActiveId((prev) => {
+        const exists = displayItems.some((it) => it.id === prev);
+        return exists ? prev : (displayItems[0]?.id ?? null);
+      });
+    }
+  }, [displayItems]);
+
+  const toggleItem = (id: string | number) => {
+    setActiveId((prev) => (prev === id ? null : id));
   };
 
   return (
@@ -77,9 +132,9 @@ export default function LegalitySection({
 
         {/* Accordion Component Styled like Unique Button */}
         <Accordion
-          items={items}
+          items={displayItems}
           activeId={activeId}
-          onToggle={(id) => toggleItem(id as number)}
+          onToggle={toggleItem}
         />
       </div>
     </section>

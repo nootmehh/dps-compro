@@ -1,7 +1,10 @@
 "use client";
 
+import { useState, useEffect, useMemo } from "react";
+import { getSiteContent } from "@/api/siteContent";
+
 export interface PartnerLogo {
-  id: string | number;
+  id?: string | number;
   name?: string;
   imageSrc?: string;
   widthClass?: string;
@@ -9,28 +12,75 @@ export interface PartnerLogo {
 
 export interface PartnerSectionProps {
   title?: string;
-  partners?: PartnerLogo[];
+  partner_img_url?: string[] | null;
+  partners?: (string | PartnerLogo)[];
   className?: string;
 }
 
 const DEFAULT_PARTNERS: PartnerLogo[] = [
-  { id: 1, name: "Partner 1", imageSrc: "https://placehold.co/84x64/f8f4f0/94a3b8?text=Logo+1", widthClass: "w-20" },
-  { id: 2, name: "Partner 2", imageSrc: "https://placehold.co/76x64/f8f4f0/94a3b8?text=Logo+2", widthClass: "w-20" },
-  { id: 3, name: "Partner 3", imageSrc: "https://placehold.co/84x63/f8f4f0/94a3b8?text=Logo+3", widthClass: "w-20" },
-  { id: 4, name: "Partner 4", imageSrc: "https://placehold.co/61x64/f8f4f0/94a3b8?text=Logo+4", widthClass: "w-16" },
-  { id: 5, name: "Partner 5", imageSrc: "https://placehold.co/242x63/f8f4f0/94a3b8?text=Partner+Corporation", widthClass: "w-48 sm:w-60" },
-  { id: 6, name: "Partner 6", imageSrc: "https://placehold.co/64x64/f8f4f0/94a3b8?text=Logo+6", widthClass: "w-16" },
-  { id: 7, name: "Partner 7", imageSrc: "https://placehold.co/98x66/f8f4f0/94a3b8?text=Logo+7", widthClass: "w-24" },
+  { id: 1, name: "Partner 1", imageSrc: "https://placehold.co/84x56/f8f4f0/94a3b8?text=Logo+1" },
+  { id: 2, name: "Partner 2", imageSrc: "https://placehold.co/76x56/f8f4f0/94a3b8?text=Logo+2" },
+  { id: 3, name: "Partner 3", imageSrc: "https://placehold.co/84x56/f8f4f0/94a3b8?text=Logo+3" },
+  { id: 4, name: "Partner 4", imageSrc: "https://placehold.co/61x56/f8f4f0/94a3b8?text=Logo+4" },
+  { id: 5, name: "Partner 5", imageSrc: "https://placehold.co/242x56/f8f4f0/94a3b8?text=Partner+Corporation" },
+  { id: 6, name: "Partner 6", imageSrc: "https://placehold.co/64x56/f8f4f0/94a3b8?text=Logo+6" },
+  { id: 7, name: "Partner 7", imageSrc: "https://placehold.co/98x56/f8f4f0/94a3b8?text=Logo+7" },
 ];
 
 export default function PartnerSection({
   title = "Mitra Terpercaya Kami",
-  partners = DEFAULT_PARTNERS,
+  partner_img_url,
+  partners,
   className = "",
 }: PartnerSectionProps) {
+  const [dbPartners, setDbPartners] = useState<string[] | null>(partner_img_url || null);
+
+  useEffect(() => {
+    if (partner_img_url) {
+      setDbPartners(partner_img_url);
+    } else if (!partners) {
+      let isMounted = true;
+      getSiteContent().then((content) => {
+        if (isMounted && content?.partner_img_url && content.partner_img_url.length > 0) {
+          setDbPartners(content.partner_img_url);
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [partner_img_url, partners]);
+
+  const displayLogos = useMemo(() => {
+    const rawList = dbPartners || partner_img_url || partners;
+    if (rawList && rawList.length > 0) {
+      return rawList.map((item, idx) => {
+        if (typeof item === "string") {
+          return {
+            id: `partner-${idx}`,
+            src: item,
+            alt: `Partner logo ${idx + 1}`,
+          };
+        }
+        return {
+          id: item.id ?? `partner-${idx}`,
+          src: item.imageSrc || "",
+          alt: item.name || `Partner ${idx + 1}`,
+        };
+      });
+    }
+
+    return DEFAULT_PARTNERS.map((p) => ({
+      id: p.id,
+      src: p.imageSrc || "",
+      alt: p.name || `Partner ${p.id}`,
+    }));
+  }, [dbPartners, partner_img_url, partners]);
+
   const hasBg = className.includes("bg-");
   const hasBorder = className.includes("border-");
   const hasPaddingY = className.includes("py-") || (className.includes("pt-") && className.includes("pb-"));
+
   return (
     <section
       aria-label="Partner Section"
@@ -44,15 +94,16 @@ export default function PartnerSection({
 
         {/* Partner Logos Row */}
         <div className="w-full flex flex-wrap justify-center items-center gap-6 sm:gap-8 lg:gap-10">
-          {partners.map((partner) => (
+          {displayLogos.map((logo) => (
             <div
-              key={partner.id}
-              className={`h-16 ${partner.widthClass || "w-24"} flex items-center justify-center grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300 select-none`}
+              key={logo.id}
+              className="h-14 flex items-center justify-center select-none shrink-0 transition-transform duration-200 hover:scale-105"
             >
               <img
-                src={partner.imageSrc}
-                alt={partner.name || `Partner ${partner.id}`}
-                className="max-h-12 w-auto object-contain"
+                src={logo.src}
+                alt={logo.alt}
+                className="h-14 w-auto object-contain"
+                loading="lazy"
               />
             </div>
           ))}

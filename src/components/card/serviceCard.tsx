@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Badge, { type BadgeVariant } from "../ui/badge";
+import Badge, { type BadgeVariant, resolveBadgeVariant } from "../ui/badge";
 import LordIcon from "../common/lordIcon";
 
 export interface ServiceCardProps {
@@ -19,7 +19,7 @@ export interface ServiceCardProps {
 export default function ServiceCard({
   imageSrc = "https://placehold.co/320x160",
   category = "Marka Jalan",
-  categoryVariant = "amber",
+  categoryVariant,
   categoryColor,
   title,
   href = "/layanan/1",
@@ -31,9 +31,7 @@ export default function ServiceCard({
   // Map categoryColor string to BadgeVariant if provided
   const badgeVar: BadgeVariant =
     categoryVariant ||
-    (categoryColor === "amber" || categoryColor === "yellow"
-      ? "amber"
-      : "green");
+    resolveBadgeVariant(categoryColor, category, "amber");
 
   const cardContent = (
     <div

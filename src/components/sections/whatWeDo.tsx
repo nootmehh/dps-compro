@@ -7,6 +7,7 @@ import Button from "../ui/button";
 import EmptyState from "../common/emptyState";
 import { getProducts, getProductSlug } from "@/api/products";
 import { getServices, getServiceSlug } from "@/api/services";
+import { type BadgeVariant, resolveBadgeVariant } from "../ui/badge";
 
 type TabType = "produk" | "layanan";
 
@@ -14,7 +15,8 @@ export interface WhatWeDoProduct {
   id?: string | number;
   imageSrc?: string;
   category?: string;
-  categoryColor?: "amber" | "blue" | "green" | "gray";
+  categoryColor?: string;
+  categoryVariant?: BadgeVariant;
   title: string;
   href?: string;
 }
@@ -23,7 +25,8 @@ export interface WhatWeDoService {
   id?: string | number;
   imageSrc?: string;
   category?: string;
-  categoryColor?: "amber" | "blue" | "green" | "gray";
+  categoryColor?: string;
+  categoryVariant?: BadgeVariant;
   title: string;
   href?: string;
 }
@@ -36,15 +39,6 @@ export interface WhatWeDoProps {
   onViewMoreProducts?: () => void;
   onViewMoreServices?: () => void;
   className?: string;
-}
-
-function getCategoryColor(category?: string | null): "amber" | "blue" | "green" | "gray" {
-  if (!category) return "green";
-  const cat = category.toLowerCase();
-  if (cat.includes("marka") || cat.includes("bahan") || cat.includes("material")) return "amber";
-  if (cat.includes("perlengkapan") || cat.includes("lalu lintas") || cat.includes("rambu")) return "blue";
-  if (cat.includes("mesin") || cat.includes("peralatan") || cat.includes("elektrikal")) return "gray";
-  return "green";
 }
 
 const DEFAULT_PRODUCTS: WhatWeDoProduct[] = [];
@@ -72,11 +66,12 @@ export default function WhatWeDo({
           data.map((p) => ({
             id: p.id,
             imageSrc:
+              (p.product_image_url && p.product_image_url.length > 0 && p.product_image_url[0]) ||
               p.highlight_img_url ||
-              (p.product_image_url && p.product_image_url[0]) ||
               "https://placehold.co/320x160",
             category: p.category || "Produk",
-            categoryColor: getCategoryColor(p.category),
+            categoryColor: p.category_color || undefined,
+            categoryVariant: resolveBadgeVariant(p.category_color, p.category, "green"),
             title: p.title,
             href: `/produk/${getProductSlug(p, data)}`,
           }))
@@ -92,7 +87,8 @@ export default function WhatWeDo({
               (s.service_image_url && s.service_image_url[0]) ||
               "https://placehold.co/320x160",
             category: s.category || "Layanan",
-            categoryColor: getCategoryColor(s.category),
+            categoryColor: s.category_color || undefined,
+            categoryVariant: resolveBadgeVariant(s.category_color, s.category, "amber"),
             title: s.title,
             href: `/layanan/${getServiceSlug(s, data)}`,
           }))
@@ -174,6 +170,7 @@ export default function WhatWeDo({
                       key={product.id || index}
                       imageSrc={product.imageSrc}
                       category={product.category}
+                      categoryVariant={product.categoryVariant}
                       categoryColor={product.categoryColor}
                       title={product.title}
                       href={product.href}
@@ -199,6 +196,7 @@ export default function WhatWeDo({
                       key={service.id || index}
                       imageSrc={service.imageSrc}
                       category={service.category}
+                      categoryVariant={service.categoryVariant}
                       categoryColor={service.categoryColor}
                       title={service.title}
                       href={service.href}

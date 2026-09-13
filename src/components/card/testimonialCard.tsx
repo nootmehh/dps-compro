@@ -4,20 +4,26 @@ import { useState } from "react";
 import LordIcon from "../common/lordIcon";
 
 export interface TestimonialCardProps {
-  quote: string;
+  quote?: string;
+  content?: string;
   name: string;
-  role: string;
+  role?: string;
+  company?: string;
   avatarSrc?: string;
   className?: string;
 }
 
 export default function TestimonialCard({
   quote,
+  content,
   name,
   role,
+  company,
   className = "",
 }: TestimonialCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const displayQuote = quote || content || "";
+  const displayRole = [role, company].filter(Boolean).join(", ");
 
   return (
     <div
@@ -41,8 +47,8 @@ export default function TestimonialCard({
       </div>
 
       {/* Quote */}
-      <p className="text-dark text-sm font-normal font-sans line-clamp-3 leading-relaxed">
-        {quote}
+      <p className="text-dark text-sm font-normal font-sans line-clamp-4 leading-relaxed">
+        {displayQuote}
       </p>
 
       {/* Author Row with Emerald Accent Bar */}
@@ -52,9 +58,11 @@ export default function TestimonialCard({
           <span className="text-g1 text-sm font-semibold font-sans truncate w-full">
             {name}
           </span>
-          <span className="text-dark/75 text-xs font-normal font-sans truncate w-full">
-            {role}
-          </span>
+          {displayRole && (
+            <span className="text-dark/75 text-xs font-normal font-sans truncate w-full">
+              {displayRole}
+            </span>
+          )}
         </div>
       </div>
     </div>

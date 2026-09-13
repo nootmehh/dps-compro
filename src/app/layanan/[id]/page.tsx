@@ -5,13 +5,15 @@ import Link from "next/link";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import ServiceCard from "@/components/card/serviceCard";
-import Badge, { type BadgeVariant } from "@/components/ui/badge";
+import Badge, { type BadgeVariant, resolveBadgeVariant } from "@/components/ui/badge";
 import Button from "@/components/ui/button";
 import Accordion from "@/components/ui/accordion";
 import LordIcon from "@/components/common/lordIcon";
 import EmptyState from "@/components/common/emptyState";
+import LoadingState from "@/components/common/loadingState";
 import { getServiceById, getServices, getServiceSlug } from "@/api/services";
 import { getProductsByIds, getProductSlug } from "@/api/products";
+import { getSiteContent, formatWhatsAppUrl } from "@/api/siteContent";
 import type { Service, ServiceAdvantageItem, ServiceFaqItem } from "@/types/database";
 
 interface RelatedService {
@@ -37,16 +39,6 @@ interface ProjectStep {
   title: string;
   desc: string;
   icon: string;
-}
-
-function getCategoryVariant(category?: string | null): BadgeVariant {
-  if (!category) return "green";
-  const cat = category.toLowerCase();
-  if (cat.includes("marka") || cat.includes("bahan") || cat.includes("material")) return "amber";
-  if (cat.includes("keselamatan") || cat.includes("penghargaan") || cat.includes("pencapaian")) return "pink";
-  if (cat.includes("perlengkapan") || cat.includes("lalu lintas") || cat.includes("rambu")) return "blue";
-  if (cat.includes("mesin") || cat.includes("peralatan") || cat.includes("elektrikal")) return "gray";
-  return "green";
 }
 
 const PROJECT_STEPS: ProjectStep[] = [
@@ -145,6 +137,7 @@ export default function ServiceDetailPage({
   const [service, setService] = useState<Service | null>(null);
   const [usedMaterials, setUsedMaterials] = useState<UsedMaterial[]>([]);
   const [relatedServices, setRelatedServices] = useState<RelatedService[]>([]);
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -155,8 +148,14 @@ export default function ServiceDetailPage({
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const data = await getServiceById(resolvedParams.id);
+      const [data, content] = await Promise.all([
+        getServiceById(resolvedParams.id),
+        getSiteContent(),
+      ]);
       setService(data);
+      if (content?.whatsapp_url) {
+        setWhatsappUrl(content.whatsapp_url);
+      }
 
       if (data?.product_id && data.product_id.length > 0) {
         const materialsData = await getProductsByIds(data.product_id);
@@ -164,10 +163,10 @@ export default function ServiceDetailPage({
           id: m.id,
           title: m.title,
           category: m.category || "Bahan Marka Jalan",
-          categoryVariant: getCategoryVariant(m.category),
+          categoryVariant: resolveBadgeVariant(m.category_color, m.category),
           imageSrc:
+            (m.product_image_url && m.product_image_url.length > 0 && m.product_image_url[0]) ||
             m.highlight_img_url ||
-            (m.product_image_url && m.product_image_url[0]) ||
             "https://placehold.co/160x87",
           href: `/produk/${getProductSlug(m, materialsData)}`,
         }));
@@ -186,7 +185,7 @@ export default function ServiceDetailPage({
             (s.service_image_url && s.service_image_url[0]) ||
             "https://placehold.co/320x160",
           category: s.category || "Layanan",
-          categoryVariant: getCategoryVariant(s.category),
+          categoryVariant: resolveBadgeVariant(s.category_color, s.category),
           title: s.title,
           href: `/layanan/${getServiceSlug(s, all)}`,
         }));
@@ -195,6 +194,12 @@ export default function ServiceDetailPage({
     }
     loadData();
   }, [resolvedParams.id]);
+
+  const handleContactClick = () => {
+    const message = `Halo, Saya Tertarik Dengan Layanan Ini : ${service?.title || ""}`;
+    const url = formatWhatsAppUrl(whatsappUrl, message);
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   const galleryImages =
     service?.service_image_url && service.service_image_url.length > 0
@@ -226,7 +231,11 @@ export default function ServiceDetailPage({
     });
   }
 
-  if (!loading && !service) {
+  if (loading) {
+    return <LoadingState />;
+  }
+
+  if (!service) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center">
         <Navbar variant="auto" />
@@ -252,7 +261,7 @@ export default function ServiceDetailPage({
   return (
     <div className="min-h-screen bg-white flex flex-col items-center">
       {/* Sticky Navbar */}
-      <Navbar variant="auto" />
+      <Navbar variant="auto" whatsappUrl={whatsappUrl || undefined} />
 
       {/* Main Content Container */}
       <main className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto pt-24 md:pt-28 pb-12 md:pb-16 flex flex-col justify-start items-start gap-3">
@@ -496,7 +505,7 @@ export default function ServiceDetailPage({
               <div>
                 <Badge
                   text={service?.category || "Layanan"}
-                  variant={getCategoryVariant(service?.category)}
+                  variant={resolveBadgeVariant(service?.category_color, service?.category)}
                 />
               </div>
               <div className="w-full h-px bg-dark/10 my-1" />
@@ -540,6 +549,7 @@ export default function ServiceDetailPage({
                   text="Hubungi Kami"
                   variant="unique-green"
                   rightIcon="Phone"
+                  onClick={handleContactClick}
                   className="w-full justify-center shadow-none [&_.pill-segment]:shadow-none cursor-pointer"
                 />
               </div>

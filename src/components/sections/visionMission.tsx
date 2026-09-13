@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LordIcon from "../common/lordIcon";
+import { getSiteContent, type SiteContent } from "@/api/siteContent";
 
 export interface VisionMissionProps {
   title?: string;
   imageSrc?: string;
   visionText?: string;
   missionList?: string[];
+  vision?: string | null;
+  mission?: string[] | null;
+  vision_img_url?: string | null;
   className?: string;
 }
+
+const DEFAULT_VISION_TEXT =
+  "Menyediakan produk dan jasa bermutu tinggi, berdaya saing kuat demi terciptanya kerjasama yang baik, serta meningkatkan keuntungan dan pertumbuhan bagi perusahaan serta instansi terkait.";
 
 const DEFAULT_MISSION_LIST = [
   "Memberikan layanan terbaik dengan ketepatan waktu dan harga yang kompetitif.",
@@ -19,15 +26,76 @@ const DEFAULT_MISSION_LIST = [
   "Berusaha menciptakan kesejahteraan karyawan.",
 ];
 
+function parseMission(rawMission: unknown): string[] {
+  if (!rawMission) return DEFAULT_MISSION_LIST;
+  if (Array.isArray(rawMission)) {
+    return (rawMission as string[]).filter(Boolean);
+  }
+  if (typeof rawMission === "string") {
+    try {
+      const parsed = JSON.parse(rawMission);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean);
+    } catch {
+      return (rawMission as string)
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+  }
+  return DEFAULT_MISSION_LIST;
+}
+
 export default function VisionMission({
   title = "Visi & Misi Kami",
-  imageSrc = "https://placehold.co/520x320",
-  visionText = "Menyediakan produk dan jasa bermutu tinggi, berdaya saing kuat demi terciptanya kerjasama yang baik, serta meningkatkan keuntungan dan pertumbuhan bagi perusahaan serta instansi terkait.",
-  missionList = DEFAULT_MISSION_LIST,
+  imageSrc,
+  visionText,
+  missionList,
+  vision,
+  mission,
+  vision_img_url,
   className = "",
 }: VisionMissionProps) {
+  const [siteContent, setSiteContent] = useState<SiteContent | null>(null);
   const [isVisionHovered, setIsVisionHovered] = useState(false);
   const [isMissionHovered, setIsMissionHovered] = useState(false);
+
+  useEffect(() => {
+    // If props are missing, fetch from Supabase
+    if (
+      !visionText &&
+      !vision &&
+      !missionList &&
+      !mission &&
+      !imageSrc &&
+      !vision_img_url
+    ) {
+      let isMounted = true;
+      getSiteContent().then((data) => {
+        if (isMounted && data) {
+          setSiteContent(data);
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [visionText, vision, missionList, mission, imageSrc, vision_img_url]);
+
+  const displayImage =
+    imageSrc ||
+    vision_img_url ||
+    siteContent?.vision_img_url ||
+    "https://placehold.co/520x320";
+
+  const displayVision =
+    visionText ||
+    vision ||
+    siteContent?.vision ||
+    DEFAULT_VISION_TEXT;
+
+  const displayMission = parseMission(
+    missionList || mission || siteContent?.mission
+  );
 
   return (
     <section
@@ -45,7 +113,7 @@ export default function VisionMission({
           {/* Left Column: Image Preview */}
           <div className="w-full lg:w-130 h-72 sm:h-80 rounded-4xl overflow-hidden bg-brand-background border border-gray-100 shrink-0">
             <img
-              src={imageSrc}
+              src={displayImage}
               alt="Visi dan Misi PT. Dua Putra Srikandi"
               className="w-full h-full object-cover"
             />
@@ -83,7 +151,7 @@ export default function VisionMission({
 
               {/* Vision Description */}
               <p className="w-full text-center text-dark/60 text-sm font-normal font-sans leading-relaxed">
-                {visionText}
+                {displayVision}
               </p>
             </div>
 
@@ -117,7 +185,7 @@ export default function VisionMission({
 
               {/* Mission Content: Array of points with dots on the left */}
               <ul className="w-full list-disc list-outside pl-5 text-left text-dark/70 text-sm font-normal font-sans leading-relaxed space-y-2">
-                {missionList.map((item, idx) => (
+                {displayMission.map((item, idx) => (
                   <li key={idx} className="pl-1">
                     {item}
                   </li>

@@ -51,6 +51,8 @@ export const LORD_ICON_MAP: Record<string, string> = {
   Goal: "/lord-icons/system/system-outline-458-target-center-hover-pinch.json",
   Info: "/lord-icons/system/system-outline-367-info-circle-hover-pinch.json",
   InfoCircle: "/lord-icons/system/system-outline-367-info-circle-hover-pinch.json",
+  PersonDigging: "/lord-icons/lineal/wired-flat-666-person-digging-hover-pinch.json",
+  Digging: "/lord-icons/lineal/wired-flat-666-person-digging-hover-pinch.json",
 
   // Contact & Communication
   Phone: "/lord-icons/system/system-outline-140-phone-hover-pinch.json",
@@ -89,6 +91,29 @@ export const LORD_ICON_MAP: Record<string, string> = {
   "brush-alt": "/lord-icons/lineal/wired-lineal-762-brush-alt-hover-pinch.json",
   Handshake: "/lord-icons/lineal/wired-lineal-456-handshake-hover-pinch.json",
   handshake: "/lord-icons/lineal/wired-lineal-456-handshake-hover-pinch.json",
+
+  // Social Media icons from /lord-icons/lineal/social-media
+  Instagram: "/lord-icons/lineal/social-media/wired-flat-2626-logo-circle-instagram-hover-roll.json",
+  instagram: "/lord-icons/lineal/social-media/wired-flat-2626-logo-circle-instagram-hover-roll.json",
+  Facebook: "/lord-icons/lineal/social-media/wired-flat-2624-logo-circle-facebook-hover-pinch.json",
+  facebook: "/lord-icons/lineal/social-media/wired-flat-2624-logo-circle-facebook-hover-pinch.json",
+  TikTok: "/lord-icons/lineal/social-media/wired-flat-2546-logo-tiktok-hover-draw.json",
+  tiktok: "/lord-icons/lineal/social-media/wired-flat-2546-logo-tiktok-hover-draw.json",
+  YouTube: "/lord-icons/lineal/social-media/wired-flat-2547-logo-youtube-hover-pinch.json",
+  youtube: "/lord-icons/lineal/social-media/wired-flat-2547-logo-youtube-hover-pinch.json",
+  LinkedIn: "/lord-icons/lineal/social-media/wired-flat-2549-logo-linkedin-hover-draw.json",
+  linkedin: "/lord-icons/lineal/social-media/wired-flat-2549-logo-linkedin-hover-draw.json",
+  Threads: "/lord-icons/lineal/social-media/wired-flat-2668-logo-circle-threads-hover-draw.json",
+  threads: "/lord-icons/lineal/social-media/wired-flat-2668-logo-circle-threads-hover-draw.json",
+  LogoX: "/lord-icons/lineal/social-media/wired-flat-2714-logo-x-hover-pinch.json",
+  x: "/lord-icons/lineal/social-media/wired-flat-2714-logo-x-hover-pinch.json",
+  Twitter: "/lord-icons/lineal/social-media/wired-flat-2714-logo-x-hover-pinch.json",
+  twitter: "/lord-icons/lineal/social-media/wired-flat-2714-logo-x-hover-pinch.json",
+  WhatsApp: "/lord-icons/system/system-outline-140-phone-hover-pinch.json",
+  whatsapp: "/lord-icons/system/system-outline-140-phone-hover-pinch.json",
+  Website: "/lord-icons/system/system-outline-458-target-center-hover-pinch.json",
+  website: "/lord-icons/system/system-outline-458-target-center-hover-pinch.json",
+  web: "/lord-icons/system/system-outline-458-target-center-hover-pinch.json",
 };
 
 export interface LordIconProps {

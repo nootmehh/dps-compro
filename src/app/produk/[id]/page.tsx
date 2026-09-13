@@ -5,11 +5,13 @@ import Link from "next/link";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import ProductCard from "@/components/card/productCard";
-import Badge, { type BadgeVariant } from "@/components/ui/badge";
+import Badge, { type BadgeVariant, resolveBadgeVariant } from "@/components/ui/badge";
 import Button from "@/components/ui/button";
 import LordIcon from "@/components/common/lordIcon";
 import EmptyState from "@/components/common/emptyState";
+import LoadingState from "@/components/common/loadingState";
 import { getProductById, getProducts, getProductSlug } from "@/api/products";
+import { getSiteContent, formatWhatsAppUrl } from "@/api/siteContent";
 import type { Product, ProductDetailItem } from "@/types/database";
 
 interface RelatedProduct {
@@ -19,16 +21,6 @@ interface RelatedProduct {
   categoryVariant: BadgeVariant;
   title: string;
   href: string;
-}
-
-function getCategoryVariant(category?: string | null): BadgeVariant {
-  if (!category) return "green";
-  const cat = category.toLowerCase();
-  if (cat.includes("marka") || cat.includes("bahan") || cat.includes("material")) return "amber";
-  if (cat.includes("keselamatan") || cat.includes("penghargaan") || cat.includes("pencapaian")) return "pink";
-  if (cat.includes("perlengkapan") || cat.includes("lalu lintas") || cat.includes("rambu")) return "blue";
-  if (cat.includes("mesin") || cat.includes("peralatan") || cat.includes("elektrikal")) return "gray";
-  return "green";
 }
 
 const DEFAULT_GALLERY = [
@@ -45,6 +37,7 @@ export default function ProductDetailPage({
   const resolvedParams = use(params);
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([]);
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -55,8 +48,14 @@ export default function ProductDetailPage({
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const data = await getProductById(resolvedParams.id);
+      const [data, content] = await Promise.all([
+        getProductById(resolvedParams.id),
+        getSiteContent(),
+      ]);
       setProduct(data);
+      if (content?.whatsapp_url) {
+        setWhatsappUrl(content.whatsapp_url);
+      }
 
       const all = await getProducts();
       const filtered = all
@@ -65,11 +64,11 @@ export default function ProductDetailPage({
         .map((p) => ({
           id: p.id,
           imageSrc:
+            (p.product_image_url && p.product_image_url.length > 0 && p.product_image_url[0]) ||
             p.highlight_img_url ||
-            (p.product_image_url && p.product_image_url[0]) ||
             "https://placehold.co/320x160",
           category: p.category || "Produk",
-          categoryVariant: getCategoryVariant(p.category),
+          categoryVariant: resolveBadgeVariant(p.category_color, p.category),
           title: p.title,
           href: `/produk/${getProductSlug(p, all)}`,
         }));
@@ -78,6 +77,12 @@ export default function ProductDetailPage({
     }
     loadData();
   }, [resolvedParams.id]);
+
+  const handleContactClick = () => {
+    const message = `Halo, Saya Tertarik Dengan Produk Ini : ${product?.title || ""}`;
+    const url = formatWhatsAppUrl(whatsappUrl, message);
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   // Gallery Images
   const galleryImages =
@@ -107,20 +112,34 @@ export default function ProductDetailPage({
         const colonIdx = item.indexOf(":");
         if (colonIdx !== -1) {
           suitableForList.push({
-            title: item.slice(0, colonIdx + 1),
+            title: item.slice(0, colonIdx).trim(),
             description: item.slice(colonIdx + 1).trim(),
           });
         } else {
           suitableForList.push({
-            title: item,
+            title: item.trim(),
             description: "",
           });
         }
       } else if (item && typeof item === "object") {
-        suitableForList.push({
-          title: item.title || "",
-          description: item.description || item.value || "",
-        });
+        const rawTitle = (item.title || "").trim();
+        const rawValue = (item.description || item.value || "").trim();
+        const colonIdx = rawTitle.indexOf(":");
+
+        if (colonIdx !== -1) {
+          const extractedTitle = rawTitle.slice(0, colonIdx).trim();
+          const extractedDesc = rawTitle.slice(colonIdx + 1).trim();
+          const combinedDesc = [extractedDesc, rawValue].filter(Boolean).join(" ");
+          suitableForList.push({
+            title: extractedTitle,
+            description: combinedDesc,
+          });
+        } else {
+          suitableForList.push({
+            title: rawTitle,
+            description: rawValue,
+          });
+        }
       }
     });
   }
@@ -149,7 +168,11 @@ export default function ProductDetailPage({
     });
   }
 
-  if (!loading && !product) {
+  if (loading) {
+    return <LoadingState />;
+  }
+
+  if (!product) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center">
         <Navbar variant="auto" />
@@ -175,7 +198,7 @@ export default function ProductDetailPage({
   return (
     <div className="min-h-screen bg-white flex flex-col items-center">
       {/* Sticky Navbar */}
-      <Navbar variant="auto" />
+      <Navbar variant="auto" whatsappUrl={whatsappUrl || undefined} />
 
       {/* Main Content Container */}
       <main className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto pt-24 md:pt-28 pb-12 md:pb-16 flex flex-col justify-start items-start gap-3">
@@ -265,36 +288,40 @@ export default function ProductDetailPage({
               </p>
             </div>
 
-            {/* 5. Section: Product Suitable For (order-5, text stacks under image on < 1200px, image does not expand) */}
-            {suitableForList.length > 0 && (
+            {/* 5. Section: Product Suitable For & Highlight Image (order-5, text stacks under image on < 1200px, image does not expand) */}
+            {(suitableForList.length > 0 || Boolean(product?.highlight_img_url?.trim())) && (
               <section
                 aria-label="Produk Ini Cocok Untuk"
                 className="order-5 w-full flex flex-col min-[1200px]:flex-row justify-start items-start gap-6"
               >
-                <img
-                  className="w-72 max-w-full h-44 sm:h-48 rounded-2xl object-cover shrink-0"
-                  src="https://placehold.co/300x164"
-                  alt="Penggunaan produk"
-                />
-                <div className="flex-1 min-w-0 flex flex-col justify-start items-start gap-2">
-                  <span className="text-dark/40 text-xs sm:text-sm font-normal font-sans tracking-wider uppercase">
-                    PRODUK INI COCOK UNTUK?
-                  </span>
-                  <ul className="w-full list-disc list-outside pl-4 text-dark text-sm font-normal font-sans leading-relaxed space-y-3">
-                    {suitableForList.map((item, idx) => (
-                      <li key={idx} className="pl-1">
-                        <span className="font-semibold text-dark block">
-                          {item.title}
-                        </span>
-                        {item.description && (
-                          <p className="text-dark/80 text-justify mt-0.5">
-                            {item.description}
-                          </p>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {product?.highlight_img_url?.trim() ? (
+                  <img
+                    className="w-72 max-w-full h-44 sm:h-48 rounded-2xl object-cover shrink-0"
+                    src={product.highlight_img_url.trim()}
+                    alt={product.title || "Penggunaan produk"}
+                  />
+                ) : null}
+                {suitableForList.length > 0 && (
+                  <div className="flex-1 min-w-0 flex flex-col justify-start items-start gap-2">
+                    <span className="text-dark/40 text-xs sm:text-sm font-normal font-sans tracking-wider uppercase">
+                      PRODUK INI COCOK UNTUK?
+                    </span>
+                    <ul className="w-full list-disc list-outside pl-4 text-dark text-sm font-normal font-sans leading-relaxed space-y-3">
+                      {suitableForList.map((item, idx) => (
+                        <li key={idx} className="pl-1">
+                          <span className="font-semibold text-dark block">
+                            {item.title}
+                          </span>
+                          {item.description && (
+                            <p className="text-dark/80 font-normal text-sm font-sans leading-relaxed text-justify mt-0.5">
+                              {item.description}
+                            </p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </section>
             )}
 
@@ -439,7 +466,7 @@ export default function ProductDetailPage({
               <div>
                 <Badge
                   text={product?.category || "Produk"}
-                  variant={getCategoryVariant(product?.category)}
+                  variant={resolveBadgeVariant(product?.category_color, product?.category)}
                 />
               </div>
 
@@ -505,6 +532,7 @@ export default function ProductDetailPage({
                   text="Hubungi Kami"
                   variant="unique-green"
                   rightIcon="Phone"
+                  onClick={handleContactClick}
                   className="w-full justify-center shadow-none [&_.pill-segment]:shadow-none cursor-pointer"
                 />
               </div>

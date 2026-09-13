@@ -1,4 +1,3 @@
-import Script from "next/script";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import Hero from "@/components/sections/hero";
@@ -18,35 +17,35 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center w-full">
-      {/* Google tag (gtag.js) - Google Analytics */}
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-3S0T90E0TT"
-        strategy="afterInteractive"
-      />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-3S0T90E0TT');
-        `}
-      </Script>
       {/* Fixed Sticky Navbar */}
-      <Navbar variant="auto" />
+      <Navbar variant="auto" whatsappUrl={siteContent?.whatsapp_url || undefined} />
 
       {/* 1. Hero Section */}
       <RevealSection className="w-full" delay={80}>
-        <Hero heroMediaUrl={siteContent?.hero_img_url || undefined} />
+        <Hero
+          heroMediaUrl={siteContent?.hero_img_url || undefined}
+          whatsappUrl={siteContent?.whatsapp_url || undefined}
+        />
       </RevealSection>
 
       {/* 2. Why Choose Us (Key Metrics Bar) */}
       <RevealSection className="w-full">
-        <WhyChooseUs />
+        <WhyChooseUs
+          valueSatisfyCustomer={siteContent?.value_satisfy_customer}
+          valueFinishedServices={siteContent?.value_finished_services}
+          valueProductProduced={siteContent?.value_product_produced}
+          valueYearsExperience={siteContent?.value_years_experience}
+        />
       </RevealSection>
 
       {/* 3. About Us Section */}
       <RevealSection className="w-full">
-        <About />
+        <About
+          mediaUrl={siteContent?.about_image_url || undefined}
+          description={siteContent?.about_description_short || undefined}
+          primaryButtonHref="/tentang"
+          secondaryButtonHref="/tentang#legalitas"
+        />
       </RevealSection>
 
       {/* 4. What We Do (Products & Services Tab Section) */}
@@ -56,12 +55,15 @@ export default async function HomePage() {
 
       {/* 5. Gallery Section (Results of Our Work) */}
       <RevealSection className="w-full">
-        <GallerySection />
+        <GallerySection
+          title={siteContent?.more_title || undefined}
+          items={siteContent?.gallery || undefined}
+        />
       </RevealSection>
 
       {/* 5b. Trusted Partners Section */}
       <RevealSection className="w-full">
-        <PartnerSection />
+        <PartnerSection partner_img_url={siteContent?.partner_img_url || undefined} />
       </RevealSection>
 
       {/* 6. Articles Section */}
@@ -71,17 +73,23 @@ export default async function HomePage() {
 
       {/* 7. Testimonials Section */}
       <RevealSection className="w-full">
-        <Testimonial />
+        <Testimonial testimonials={siteContent?.testimonials || undefined} />
       </RevealSection>
 
       {/* 8. Call to Action Banner */}
       <RevealSection className="w-full">
-        <CtaSection />
+        <CtaSection whatsappUrl={siteContent?.whatsapp_url || undefined} />
       </RevealSection>
 
       {/* 9. Footer Section */}
       <RevealSection className="w-full">
-        <Footer />
+        <Footer
+          phone={siteContent?.phone || undefined}
+          email={siteContent?.email || undefined}
+          address={siteContent?.address || undefined}
+          whatsappUrl={siteContent?.whatsapp_url || undefined}
+          socialMedia={siteContent?.social_media || undefined}
+        />
       </RevealSection>
     </div>
   );

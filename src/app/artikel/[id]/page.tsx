@@ -4,10 +4,11 @@ import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
-import Badge, { type BadgeVariant } from "@/components/ui/badge";
+import Badge, { type BadgeVariant, resolveBadgeVariant } from "@/components/ui/badge";
 import Button from "@/components/ui/button";
 import LordIcon from "@/components/common/lordIcon";
 import EmptyState from "@/components/common/emptyState";
+import LoadingState from "@/components/common/loadingState";
 import { getArticleById, getArticles, getArticleSlug } from "@/api/articles";
 import type { Article } from "@/types/database";
 
@@ -18,16 +19,6 @@ interface RelatedArticle {
   categoryVariant: BadgeVariant;
   title: string;
   href: string;
-}
-
-function getCategoryVariant(category?: string | null): BadgeVariant {
-  if (!category) return "pink";
-  const cat = category.toLowerCase();
-  if (cat.includes("marka") || cat.includes("bahan") || cat.includes("material")) return "amber";
-  if (cat.includes("keselamatan") || cat.includes("penghargaan") || cat.includes("pencapaian")) return "pink";
-  if (cat.includes("perlengkapan") || cat.includes("lalu lintas") || cat.includes("rambu")) return "blue";
-  if (cat.includes("mesin") || cat.includes("peralatan") || cat.includes("elektrikal")) return "gray";
-  return "green";
 }
 
 function formatDate(dateStr?: string): string {
@@ -106,7 +97,7 @@ export default function ArticleDetailPage({
           id: a.id,
           imageSrc: "https://placehold.co/320x160",
           category: a.category || "Artikel",
-          categoryVariant: getCategoryVariant(a.category),
+          categoryVariant: resolveBadgeVariant(a.category_color, a.category),
           title: a.title,
           href: `/artikel/${getArticleSlug(a, all)}`,
         }));
@@ -116,7 +107,11 @@ export default function ArticleDetailPage({
     loadData();
   }, [resolvedParams.id]);
 
-  if (!loading && !article) {
+  if (loading) {
+    return <LoadingState />;
+  }
+
+  if (!article) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center">
         <Navbar variant="auto" />
@@ -203,7 +198,7 @@ export default function ArticleDetailPage({
                 {/* Category Badge */}
                 <Badge
                   text={article?.category || "Artikel"}
-                  variant={getCategoryVariant(article?.category)}
+                  variant={resolveBadgeVariant(article?.category_color, article?.category)}
                 />
 
                 {/* Upload Time Badge */}

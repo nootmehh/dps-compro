@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Button from "../ui/button";
+import { getSiteContent, formatWhatsAppUrl } from "@/api/siteContent";
 
 export interface CtaSectionProps {
   titlePrefix?: string;
@@ -12,6 +14,7 @@ export interface CtaSectionProps {
   secondaryButtonHref?: string;
   onPrimaryClick?: () => void;
   onSecondaryClick?: () => void;
+  whatsappUrl?: string;
   imageSrc?: string;
   className?: string;
 }
@@ -25,9 +28,36 @@ export default function CtaSection({
   secondaryButtonHref = "/produk",
   onPrimaryClick,
   onSecondaryClick,
+  whatsappUrl,
   imageSrc = "/illustration/CTA llustration.png",
   className = "",
 }: CtaSectionProps) {
+  const [siteWhatsappUrl, setSiteWhatsappUrl] = useState<string | null>(whatsappUrl || null);
+
+  useEffect(() => {
+    if (whatsappUrl) {
+      setSiteWhatsappUrl(whatsappUrl);
+    } else if (!primaryButtonHref && !onPrimaryClick) {
+      let isMounted = true;
+      getSiteContent().then((content) => {
+        if (isMounted && content?.whatsapp_url) {
+          setSiteWhatsappUrl(content.whatsapp_url);
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [whatsappUrl, primaryButtonHref, onPrimaryClick]);
+
+  const handlePrimaryClick = () => {
+    if (onPrimaryClick) {
+      onPrimaryClick();
+    } else if (!primaryButtonHref) {
+      const url = formatWhatsAppUrl(whatsappUrl || siteWhatsappUrl);
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  };
   return (
     <section
       aria-label="Call to Action Section"
@@ -50,7 +80,7 @@ export default function CtaSection({
                   text={primaryButtonText}
                   variant="unique-green"
                   rightIcon="Right 1"
-                  onClick={onPrimaryClick}
+                  onClick={handlePrimaryClick}
                   className="cursor-pointer shadow-none [&_.pill-segment]:shadow-none"
                 />
               </Link>
@@ -60,7 +90,7 @@ export default function CtaSection({
                 text={primaryButtonText}
                 variant="unique-green"
                 rightIcon="Right 1"
-                onClick={onPrimaryClick}
+                onClick={handlePrimaryClick}
                 className="cursor-pointer shadow-none [&_.pill-segment]:shadow-none"
               />
             )}

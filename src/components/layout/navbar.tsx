@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Button from "../ui/button";
 import LordIcon from "../common/lordIcon";
+import { getSiteContent, formatWhatsAppUrl } from "@/api/siteContent";
 
 export interface NavItem {
   label: string;
@@ -20,6 +21,7 @@ export interface NavbarProps {
   navItems?: NavItem[];
   ctaText?: string;
   onCtaClick?: () => void;
+  whatsappUrl?: string;
   userName?: string;
   userRole?: string;
   onLogout?: () => void;
@@ -42,9 +44,11 @@ export default function Navbar({
   navItems = DEFAULT_NAV_ITEMS,
   ctaText = "Minta Penawaran Harga",
   onCtaClick,
+  whatsappUrl,
   className = "",
 }: NavbarProps) {
   const pathname = usePathname();
+  const [siteWhatsappUrl, setSiteWhatsappUrl] = useState<string | null>(whatsappUrl || null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isColliding, setIsColliding] = useState(false);
@@ -53,6 +57,32 @@ export default function Navbar({
   const logoRef = useRef<HTMLAnchorElement>(null);
   // Dedicated invisible container to measure the unconstrained natural width of desktop nav
   const measureRef = useRef<HTMLDivElement>(null);
+
+  // Fetch whatsapp_url if not provided
+  useEffect(() => {
+    if (whatsappUrl) {
+      setSiteWhatsappUrl(whatsappUrl);
+    } else if (!onCtaClick) {
+      let isMounted = true;
+      getSiteContent().then((content) => {
+        if (isMounted && content?.whatsapp_url) {
+          setSiteWhatsappUrl(content.whatsapp_url);
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [whatsappUrl, onCtaClick]);
+
+  const handleCtaClick = () => {
+    if (onCtaClick) {
+      onCtaClick();
+    } else {
+      const url = formatWhatsAppUrl(whatsappUrl || siteWhatsappUrl);
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  };
 
   // Scroll detection for auto variant
   useEffect(() => {
@@ -196,7 +226,7 @@ export default function Navbar({
               text={ctaText}
               variant="unique-green"
               rightIcon="Phone"
-              onClick={onCtaClick}
+              onClick={handleCtaClick}
               className="cursor-pointer shadow-none [&_.pill-segment]:shadow-none whitespace-nowrap"
             />
           </div>
@@ -319,7 +349,7 @@ export default function Navbar({
             rightIcon="Phone"
             onClick={() => {
               setMobileMenuOpen(false);
-              if (onCtaClick) onCtaClick();
+              handleCtaClick();
             }}
             className="w-full justify-center cursor-pointer shadow-none [&_.pill-segment]:shadow-none whitespace-nowrap"
           />

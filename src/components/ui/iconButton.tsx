@@ -11,6 +11,8 @@ export interface IconButtonProps
   icon: string;
   iconSize?: number;
   iconColor?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
   variant?: IconButtonVariant;
   size?: IconButtonSize;
   href?: string;
@@ -24,6 +26,8 @@ export default function IconButton({
   icon,
   iconSize = 20,
   iconColor,
+  primaryColor: propPrimaryColor,
+  secondaryColor,
   variant = "fill",
   size = "default",
   href,
@@ -75,7 +79,7 @@ export default function IconButton({
       break;
   }
 
-  const primaryColor = iconColor || defaultIconColor;
+  const primaryColor = iconColor || propPrimaryColor || defaultIconColor;
 
   const baseClasses = `group btn-custom btn-icon-custom btn-icon-${variant} ${variantClasses} ${sizeClasses} rounded-full inline-flex items-center justify-center cursor-pointer select-none transition-all duration-200 hover:opacity-75 active:opacity-50 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed ${className}`;
 
@@ -93,6 +97,7 @@ export default function IconButton({
           name={icon}
           size={iconSize}
           primaryColor={primaryColor}
+          secondaryColor={secondaryColor}
           target="a"
         />
       </a>
@@ -112,6 +117,7 @@ export default function IconButton({
         name={icon}
         size={iconSize}
         primaryColor={primaryColor}
+        secondaryColor={secondaryColor}
         target="button"
       />
     </button>

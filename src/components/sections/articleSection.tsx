@@ -51,6 +51,7 @@ export default function ArticleSection({
             id: a.id,
             imageSrc: "https://placehold.co/320x160",
             category: a.category || "Artikel",
+            categoryColor: a.category_color || undefined,
             title: a.title,
             date: formatDate(a.created_at),
             href: `/artikel/${getArticleSlug(a, data)}`,
@@ -100,6 +101,7 @@ export default function ArticleSection({
                   key={article.id || index}
                   imageSrc={article.imageSrc}
                   category={article.category}
+                  categoryVariant={article.categoryVariant}
                   categoryColor={article.categoryColor}
                   title={article.title}
                   date={article.date}

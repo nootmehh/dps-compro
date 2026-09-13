@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Button from "../ui/button";
-import { getSiteContent, isVideoUrl } from "@/api/siteContent";
+import { getSiteContent, isVideoUrl, formatWhatsAppUrl } from "@/api/siteContent";
 
 export interface HeroProps {
   title?: string;
@@ -13,6 +13,7 @@ export interface HeroProps {
   onContact?: () => void;
   backgroundImageSrc?: string;
   heroMediaUrl?: string;
+  whatsappUrl?: string;
   className?: string;
 }
 
@@ -25,10 +26,12 @@ export default function Hero({
   onContact,
   backgroundImageSrc,
   heroMediaUrl,
+  whatsappUrl,
   className = "",
 }: HeroProps) {
   const initialMedia = heroMediaUrl || backgroundImageSrc || null;
   const [media, setMedia] = useState<string | null>(initialMedia);
+  const [siteWhatsappUrl, setSiteWhatsappUrl] = useState<string | null>(whatsappUrl || null);
 
   useEffect(() => {
     if (heroMediaUrl || backgroundImageSrc) {
@@ -38,15 +41,29 @@ export default function Hero({
 
     let isMounted = true;
     getSiteContent().then((content) => {
-      if (isMounted && content?.hero_img_url) {
-        setMedia(content.hero_img_url);
+      if (isMounted && content) {
+        if (!initialMedia && content.hero_img_url) {
+          setMedia(content.hero_img_url);
+        }
+        if (!whatsappUrl && content.whatsapp_url) {
+          setSiteWhatsappUrl(content.whatsapp_url);
+        }
       }
     });
 
     return () => {
       isMounted = false;
     };
-  }, [heroMediaUrl, backgroundImageSrc]);
+  }, [heroMediaUrl, backgroundImageSrc, whatsappUrl, initialMedia]);
+
+  const handleContact = () => {
+    if (onContact) {
+      onContact();
+    } else {
+      const targetUrl = formatWhatsAppUrl(whatsappUrl || siteWhatsappUrl);
+      window.open(targetUrl, "_blank", "noopener,noreferrer");
+    }
+  };
 
   const isVideo = isVideoUrl(media);
   const fallbackImage = "https://placehold.co/1440x600";
@@ -119,7 +136,7 @@ export default function Hero({
               type="button"
               text={contactText}
               variant="glass"
-              onClick={onContact}
+              onClick={handleContact}
               className="cursor-pointer"
             />
           </div>
