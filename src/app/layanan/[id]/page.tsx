@@ -255,7 +255,7 @@ export default function ServiceDetailPage({
       <Navbar variant="auto" />
 
       {/* Main Content Container */}
-      <main className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto pt-24 md:pt-28 pb-12 md:pb-16 flex flex-col justify-start items-start gap-[12px]">
+      <main className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto pt-24 md:pt-28 pb-12 md:pb-16 flex flex-col justify-start items-start gap-3">
         {/* Breadcrumb Row */}
         <nav
           aria-label="Breadcrumb"

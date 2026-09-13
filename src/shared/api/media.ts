@@ -6,7 +6,7 @@ export interface MediaItem {
   createdAt?: string;
 }
 
-export async function fetchMediaList(category: string = "media"): Promise<{ data: MediaItem[] }> {
+export async function fetchMediaList(_category: string = "media"): Promise<{ data: MediaItem[] }> {
   try {
     const stored = typeof window !== "undefined" ? localStorage.getItem("lyfline_media_items") : null;
     if (stored) {

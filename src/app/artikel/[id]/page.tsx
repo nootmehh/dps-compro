@@ -72,7 +72,7 @@ function RelatedArticleCard({ item }: { item: RelatedArticle }) {
         <Badge text={item.category} variant={item.categoryVariant} />
         <p
           className={`text-dark text-sm font-semibold font-sans line-clamp-2 leading-snug transition-colors ${
-            isHovered ? "!text-g1" : "group-hover:text-g1"
+            isHovered ? "text-g1!" : "group-hover:text-g1"
           }`}
         >
           {item.title}
@@ -150,7 +150,7 @@ export default function ArticleDetailPage({
       <Navbar variant="auto" />
 
       {/* Main Container */}
-      <main className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto pt-24 md:pt-28 pb-12 md:pb-16 flex flex-col justify-start items-start gap-[12px]">
+      <main className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto pt-24 md:pt-28 pb-12 md:pb-16 flex flex-col justify-start items-start gap-3">
         {/* Breadcrumb Row */}
         <nav
           aria-label="Breadcrumb"

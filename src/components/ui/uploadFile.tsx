@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import Button from "./button";
 import MediaSelectModal, { MediaSelectModalItem } from "./modal/mediaSelectModal";
 import LordIcon from "../common/lordIcon";
 
@@ -25,8 +24,8 @@ export interface UploadFileProps {
 export default function UploadFile({
     label = "Unggah Berkas",
     onFilesSelected,
-    descriptionPrefix,
-    descriptionValue,
+    descriptionPrefix: _descriptionPrefix,
+    descriptionValue: _descriptionValue,
     multiple = false,
     accept = "image/*",
     maxFiles = 5,

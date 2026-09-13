@@ -10,7 +10,7 @@ import Button from "@/components/ui/button";
 import LordIcon from "@/components/common/lordIcon";
 import EmptyState from "@/components/common/emptyState";
 import { getProductById, getProducts, getProductSlug } from "@/api/products";
-import type { Product, ProductDetailItem, ProsConsItem } from "@/types/database";
+import type { Product, ProductDetailItem } from "@/types/database";
 
 interface RelatedProduct {
   id: string | number;
@@ -178,7 +178,7 @@ export default function ProductDetailPage({
       <Navbar variant="auto" />
 
       {/* Main Content Container */}
-      <main className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto pt-24 md:pt-28 pb-12 md:pb-16 flex flex-col justify-start items-start gap-[12px]">
+      <main className="w-full max-w-360 px-6 md:px-16 lg:px-24 mx-auto pt-24 md:pt-28 pb-12 md:pb-16 flex flex-col justify-start items-start gap-3">
         {/* Breadcrumb Row */}
         <nav
           aria-label="Breadcrumb"

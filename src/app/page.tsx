@@ -1,3 +1,4 @@
+import Script from "next/script";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import Hero from "@/components/sections/hero";
@@ -14,6 +15,19 @@ import RevealSection from "@/components/common/revealSection";
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center w-full">
+      {/* Google tag (gtag.js) - Google Analytics */}
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-NFPRB0Q1VN"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-NFPRB0Q1VN');
+        `}
+      </Script>
       {/* Fixed Sticky Navbar */}
       <Navbar variant="auto" />
 

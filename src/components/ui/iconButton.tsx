@@ -77,7 +77,7 @@ export default function IconButton({
 
   const primaryColor = iconColor || defaultIconColor;
 
-  const baseClasses = `group btn-custom btn-icon-custom btn-icon-${variant} ${sizeClasses} rounded-full inline-flex items-center justify-center cursor-pointer select-none transition-all duration-200 hover:opacity-75 active:opacity-50 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed ${className}`;
+  const baseClasses = `group btn-custom btn-icon-custom btn-icon-${variant} ${variantClasses} ${sizeClasses} rounded-full inline-flex items-center justify-center cursor-pointer select-none transition-all duration-200 hover:opacity-75 active:opacity-50 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed ${className}`;
 
   if (href) {
     return (

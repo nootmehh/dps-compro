@@ -159,7 +159,7 @@ export default function Navbar({
         >
           {/* Full Logo on >= 420px */}
           <img
-            className="h-9 w-auto object-contain transition-all aspect-[801/96] hidden min-[420px]:block"
+            className="h-9 w-auto object-contain transition-all aspect-801/96 hidden min-[420px]:block"
             src={logoSrc || (isTransparent ? "/dps-logo-white.png" : "/dps-logo-default.png")}
             alt={brandTitle || "DPS Logo"}
           />
@@ -231,7 +231,7 @@ export default function Navbar({
       <div
         ref={measureRef}
         aria-hidden="true"
-        className="fixed -top-[9999px] -left-[9999px] flex items-center gap-6 pointer-events-none opacity-0 select-none shrink-0"
+        className="fixed top-[-9999px] left-[-9999px] flex items-center gap-6 pointer-events-none opacity-0 select-none shrink-0"
         style={{ visibility: "hidden" }}
       >
         {navItems.map((item) => (
@@ -255,7 +255,7 @@ export default function Navbar({
 
       {/* Backdrop overlay */}
       <div
-        className={`fixed inset-0 z-[60] bg-dark/60 backdrop-blur-xs transition-opacity duration-300 ${
+        className={`fixed inset-0 z-60 bg-dark/60 backdrop-blur-xs transition-opacity duration-300 ${
           mobileMenuOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -267,7 +267,7 @@ export default function Navbar({
       {/* Sidebar Panel — slides in from the left */}
       <aside
         aria-label="Mobile Navigation Sidebar"
-        className={`fixed top-0 left-0 bottom-0 z-[70] w-72 sm:w-80 h-screen bg-white text-dark shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 bottom-0 z-70 w-72 sm:w-80 h-screen bg-white text-dark shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

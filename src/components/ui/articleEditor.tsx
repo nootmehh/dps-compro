@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import LordIcon from "../common/lordIcon";
 
 export interface ArticleEditorProps {
   label?: string;

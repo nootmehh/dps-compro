@@ -79,7 +79,7 @@ export default function LegalitySection({
         <Accordion
           items={items}
           activeId={activeId}
-          onToggle={(id) => setActiveId(activeId === id ? null : (id as number))}
+          onToggle={(id) => toggleItem(id as number)}
         />
       </div>
     </section>
