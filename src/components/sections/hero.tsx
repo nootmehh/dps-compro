@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Button from "../ui/button";
+import { getSiteContent, isVideoUrl } from "@/api/siteContent";
 
 export interface HeroProps {
   title?: string;
@@ -10,6 +12,7 @@ export interface HeroProps {
   onReadMore?: () => void;
   onContact?: () => void;
   backgroundImageSrc?: string;
+  heroMediaUrl?: string;
   className?: string;
 }
 
@@ -20,19 +23,57 @@ export default function Hero({
   contactText = "Hubungi Kami",
   onReadMore,
   onContact,
-  backgroundImageSrc = "https://placehold.co/1440x600",
+  backgroundImageSrc,
+  heroMediaUrl,
   className = "",
 }: HeroProps) {
+  const initialMedia = heroMediaUrl || backgroundImageSrc || null;
+  const [media, setMedia] = useState<string | null>(initialMedia);
+
+  useEffect(() => {
+    if (heroMediaUrl || backgroundImageSrc) {
+      setMedia(heroMediaUrl || backgroundImageSrc || null);
+      return;
+    }
+
+    let isMounted = true;
+    getSiteContent().then((content) => {
+      if (isMounted && content?.hero_img_url) {
+        setMedia(content.hero_img_url);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [heroMediaUrl, backgroundImageSrc]);
+
+  const isVideo = isVideoUrl(media);
+  const fallbackImage = "https://placehold.co/1440x600";
+  const activeMediaSource = media || fallbackImage;
+
   return (
     <section
       aria-label="Hero Section"
       className={`relative w-full h-[90vh] min-h-145 bg-dark overflow-hidden flex flex-col justify-end items-center ${className}`}
     >
-      {/* Background Image with Dark Overlay */}
-      {backgroundImageSrc && (
+      {/* Background Media with Dark Overlay */}
+      {media && isVideo ? (
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover scale-105 transition-transform duration-1000"
+            src={media}
+          />
+          <div className="absolute inset-0 bg-dark/60 bg-linear-to-r from-dark/80 via-dark/50 to-dark/30" />
+        </div>
+      ) : (
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0 scale-105 transition-transform duration-1000"
-          style={{ backgroundImage: `url('${backgroundImageSrc}')` }}
+          style={{ backgroundImage: `url('${activeMediaSource}')` }}
         >
           <div className="absolute inset-0 bg-dark/60 bg-linear-to-r from-dark/80 via-dark/50 to-dark/30" />
         </div>
@@ -85,7 +126,7 @@ export default function Hero({
         </div>
       </div>
 
-      {/* Absolute Bottom-Right Hero Illustration (Touches bottom of section, aligned to container right padding) */}
+      {/* Absolute Bottom-Right Hero Illustration */}
       <div className="absolute inset-x-0 bottom-0 max-w-360 px-6 md:px-16 lg:px-24 mx-auto pointer-events-none hidden md:flex justify-end items-end z-0">
         <img
           className="w-auto h-60 sm:h-76 md:h-97.5 lg:h-115 xl:h-127.5 max-w-105 sm:max-w-132.5 lg:max-w-162.5 object-contain object-bottom select-none"

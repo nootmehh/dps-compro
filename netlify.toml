@@ -1,0 +1,11 @@
+[[redirects]]
+  from = "https://devdpscompro.netlify.app/*"
+  to = "https://dev.dpsmarkajalan.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://devdpscompro.netlify.app/*"
+  to = "https://dev.dpsmarkajalan.com/:splat"
+  status = 301
+  force = true

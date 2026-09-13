@@ -11,13 +11,16 @@ import ArticleSection from "@/components/sections/articleSection";
 import Testimonial from "@/components/sections/testimonial";
 import CtaSection from "@/components/sections/cta";
 import RevealSection from "@/components/common/revealSection";
+import { getSiteContent } from "@/api/siteContent";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const siteContent = await getSiteContent();
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center w-full">
       {/* Google tag (gtag.js) - Google Analytics */}
       <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-NFPRB0Q1VN"
+        src="https://www.googletagmanager.com/gtag/js?id=G-3S0T90E0TT"
         strategy="afterInteractive"
       />
       <Script id="google-analytics" strategy="afterInteractive">
@@ -25,7 +28,7 @@ export default function HomePage() {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', 'G-NFPRB0Q1VN');
+          gtag('config', 'G-3S0T90E0TT');
         `}
       </Script>
       {/* Fixed Sticky Navbar */}
@@ -33,7 +36,7 @@ export default function HomePage() {
 
       {/* 1. Hero Section */}
       <RevealSection className="w-full" delay={80}>
-        <Hero />
+        <Hero heroMediaUrl={siteContent?.hero_img_url || undefined} />
       </RevealSection>
 
       {/* 2. Why Choose Us (Key Metrics Bar) */}
