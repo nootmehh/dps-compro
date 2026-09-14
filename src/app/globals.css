@@ -58,13 +58,17 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  overflow-x: clip;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 lord-icon {
@@ -430,3 +434,107 @@ lord-icon {
     transition: none !important;
   }
 }
+
+/* ==========================================================================
+   Article Rich Text Body Styles
+   ========================================================================== */
+.article-body {
+  width: 100%;
+  color: rgba(17, 13, 49, 0.85);
+  font-family: var(--font-sans);
+  line-height: 1.8;
+  word-break: break-word;
+}
+
+.article-body p {
+  margin-bottom: 1.25rem;
+  line-height: 1.8;
+}
+
+.article-body p:last-child {
+  margin-bottom: 0;
+}
+
+.article-body strong,
+.article-body b {
+  font-weight: 700;
+  color: var(--dark, #110d31);
+}
+
+.article-body em,
+.article-body i {
+  font-style: italic;
+}
+
+.article-body u {
+  text-decoration: underline;
+}
+
+.article-body h1,
+.article-body h2,
+.article-body h3,
+.article-body h4 {
+  color: var(--dark, #110d31);
+  font-weight: 700;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.35;
+}
+
+.article-body h1 {
+  font-size: 1.75rem;
+}
+
+.article-body h2 {
+  font-size: 1.45rem;
+}
+
+.article-body h3 {
+  font-size: 1.25rem;
+}
+
+.article-body ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 1.25rem 0;
+}
+
+.article-body ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 1.25rem 0;
+}
+
+.article-body li {
+  margin-bottom: 0.5rem;
+  line-height: 1.75;
+}
+
+.article-body blockquote {
+  border-left: 4px solid var(--g1, #0a9863);
+  padding: 0.85rem 1.25rem;
+  margin: 1.5rem 0;
+  background-color: rgba(10, 152, 99, 0.06);
+  border-radius: 0 0.85rem 0.85rem 0;
+  font-style: italic;
+  color: rgba(17, 13, 49, 0.85);
+}
+
+.article-body img {
+  border-radius: 1rem;
+  max-width: 100%;
+  height: auto;
+  margin: 1.5rem auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.article-body a {
+  color: var(--g1, #0a9863);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.article-body a:hover {
+  color: var(--g3, #034f04);
+}
+

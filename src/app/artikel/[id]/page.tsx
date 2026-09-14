@@ -73,6 +73,19 @@ function RelatedArticleCard({ item }: { item: RelatedArticle }) {
   );
 }
 
+function formatArticleHtml(raw?: string | null): string {
+  if (!raw) return "";
+  const trimmed = raw.trim();
+  const hasHtml = /<[a-z][\s\S]*>/i.test(trimmed);
+  if (hasHtml) {
+    return trimmed;
+  }
+  return trimmed
+    .split(/\n\s*\n/)
+    .map((p) => `<p>${p.trim().replace(/\n/g, "<br/>")}</p>`)
+    .join("");
+}
+
 export default function ArticleDetailPage({
   params,
 }: {
@@ -95,7 +108,7 @@ export default function ArticleDetailPage({
         .slice(0, 4)
         .map((a) => ({
           id: a.id,
-          imageSrc: "https://placehold.co/320x160",
+          imageSrc: a.img_url || "https://placehold.co/320x160",
           category: a.category || "Artikel",
           categoryVariant: resolveBadgeVariant(a.category_color, a.category),
           title: a.title,
@@ -134,10 +147,6 @@ export default function ArticleDetailPage({
     );
   }
 
-  // Parse paragraphs if content is present
-  const contentParagraphs = article?.content
-    ? article.content.split("\n\n").filter(Boolean)
-    : [];
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center">
@@ -224,25 +233,24 @@ export default function ArticleDetailPage({
             <div className="w-full h-64 sm:h-80 md:h-103.5 rounded-4xl overflow-hidden bg-brand-background shadow-xs">
               <img
                 className="size-full object-cover"
-                src="https://placehold.co/780x414"
+                src={article?.img_url || "https://placehold.co/780x414"}
                 alt={article?.title || "Hero banner"}
               />
             </div>
 
             {/* Rich Article Prose Body */}
-            <div className="w-full text-dark/80 text-sm sm:text-base font-normal font-sans leading-relaxed text-justify space-y-4">
-              {contentParagraphs.length > 0 ? (
-                contentParagraphs.map((para, idx) => (
-                  <p key={idx}>{para}</p>
-                ))
-              ) : article?.content ? (
-                <p>{article.content}</p>
-              ) : (
-                <p className="text-dark/50 italic">
-                  Konten artikel belum tersedia.
-                </p>
-              )}
-            </div>
+            {article?.content ? (
+              <div
+                className="article-body"
+                dangerouslySetInnerHTML={{
+                  __html: formatArticleHtml(article.content),
+                }}
+              />
+            ) : (
+              <p className="text-dark/50 italic text-sm sm:text-base">
+                Konten artikel belum tersedia.
+              </p>
+            )}
           </article>
 
           {/* Right Column: Sidebar "Artikel Lainnya" */}

@@ -27,19 +27,7 @@ export default function RevealSection({
       return;
     }
 
-    // If already in or near viewport on initial load, reveal immediately so scrolling is never stuck
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight + 120 && rect.bottom > -50) {
-      if (delay > 0) {
-        const timer = setTimeout(() => setIsRevealed(true), delay);
-        return () => clearTimeout(timer);
-      } else {
-        setIsRevealed(true);
-        return;
-      }
-    }
-
-    // Pre-trigger 120px before entering viewport so animations glide in seamlessly ahead of the scroll
+    // Pre-trigger 150px before entering viewport so animations glide in seamlessly ahead of the scroll
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {

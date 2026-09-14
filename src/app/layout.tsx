@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Open_Sans } from "next/font/google";
 import { getSeoSettings, DEFAULT_SEO_SETTINGS } from "@/api/seo";
@@ -9,6 +9,12 @@ const openSans = Open_Sans({
   subsets: ["latin"],
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoSettings();
@@ -98,7 +104,7 @@ export default async function RootLayout({
       : "G-3S0T90E0TT";
 
   return (
-    <html lang="en" className={`${openSans.variable} font-sans antialiased`}>
+    <html lang="en" className={`${openSans.variable} font-sans antialiased`} suppressHydrationWarning>
       <head>
         <link rel="icon" href={favicon} type={faviconType} />
         <link rel="shortcut icon" href={favicon} />
@@ -117,7 +123,10 @@ export default async function RootLayout({
           `}
         </Script>
       </head>
-      <body className="min-h-screen bg-brand-background text-dark flex flex-col">
+      <body
+        className="min-h-screen bg-brand-background text-dark flex flex-col"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

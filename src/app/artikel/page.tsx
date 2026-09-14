@@ -65,7 +65,7 @@ export default function ArticleCatalogPage() {
         const data = await getArticles();
         const mapped: ArticleItemData[] = data.map((a) => ({
           id: a.id,
-          imageSrc: "https://placehold.co/320x160",
+          imageSrc: a.img_url || "https://placehold.co/320x160",
           category: a.category || "Artikel",
           categoryVariant: resolveBadgeVariant(a.category_color, a.category, "green"),
           title: a.title,

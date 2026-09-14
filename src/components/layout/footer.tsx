@@ -41,31 +41,30 @@ export default function Footer({
   const [siteContent, setSiteContent] = useState<SiteContent | null>(null);
 
   useEffect(() => {
-    // If contact props or socialMedia are missing, fetch from Supabase
-    if (!phone || !email || !address || !whatsappUrl || !socialMedia) {
-      let isMounted = true;
-      getSiteContent().then((data) => {
-        if (isMounted && data) {
-          setSiteContent(data);
-        }
-      });
-      return () => {
-        isMounted = false;
-      };
-    }
-  }, [phone, email, address, whatsappUrl, socialMedia]);
+    // Always fetch latest siteContent on mount to ensure fresh social media and contact info
+    let isMounted = true;
+    getSiteContent().then((data) => {
+      if (isMounted && data) {
+        setSiteContent(data);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-  const displayPhone = phone || siteContent?.phone || DEFAULT_PHONE;
-  const displayEmail = email || siteContent?.email || DEFAULT_EMAIL;
-  const displayAddress = address || siteContent?.address || DEFAULT_ADDRESS;
+  const displayPhone = (siteContent ? siteContent.phone : phone) || DEFAULT_PHONE;
+  const displayEmail = (siteContent ? siteContent.email : email) || DEFAULT_EMAIL;
+  const displayAddress = (siteContent ? siteContent.address : address) || DEFAULT_ADDRESS;
   const cleanPhone = displayPhone.replace(/[^\d+]/g, "");
 
   const displayWhatsapp = formatWhatsAppUrl(
-    whatsappUrl || siteContent?.whatsapp_url || displayPhone
+    (siteContent ? siteContent.whatsapp_url : whatsappUrl) || displayPhone
   );
 
-  // Derive active social media links directly from the social_media column
-  const rawSocialMedia = socialMedia || siteContent?.social_media;
+  // Derive active social media links: prioritize fresh client-side siteContent when available,
+  // falling back to initial props from server-side rendering
+  const rawSocialMedia = siteContent ? siteContent.social_media : socialMedia;
 
   const socialList = useMemo(() => {
     if (!rawSocialMedia) return [];

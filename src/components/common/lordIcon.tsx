@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState, useRef, type CSSProperties } from "react";
 
 // Name mapping to lord-icons files in public/lord-icons/system
 export const LORD_ICON_MAP: Record<string, string> = {
@@ -137,6 +137,22 @@ export interface LordIconProps {
 }
 
 let isElementRegistered = false;
+let registerPromise: Promise<void> | null = null;
+
+function loadLordIconElement(): Promise<void> {
+  if (isElementRegistered) return Promise.resolve();
+  if (!registerPromise) {
+    registerPromise = import("@lordicon/element")
+      .then(({ defineElement }) => {
+        defineElement();
+        isElementRegistered = true;
+      })
+      .catch((err) => {
+        console.error("Failed to load @lordicon/element", err);
+      });
+  }
+  return registerPromise;
+}
 
 export default function LordIcon({
   name,
@@ -152,25 +168,43 @@ export default function LordIcon({
   className = "",
   style,
 }: LordIconProps) {
+  const containerRef = useRef<HTMLSpanElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const [ready, setReady] = useState(isElementRegistered);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (!isElementRegistered) {
-        import("@lordicon/element")
-          .then(({ defineElement }) => {
-            defineElement();
-            isElementRegistered = true;
-            setReady(true);
-          })
-          .catch((err) => {
-            console.error("Failed to load @lordicon/element", err);
-          });
-      } else {
-        setReady(true);
-      }
+    if (typeof window === "undefined") return;
+
+    if (!("IntersectionObserver" in window)) {
+      setIsVisible(true);
+      loadLordIconElement().then(() => setReady(true));
+      return;
     }
+
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          loadLordIconElement().then(() => setReady(true));
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "300px 0px 300px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
+
+  const handleMouseEnter = () => {
+    if (!isVisible || !ready) {
+      setIsVisible(true);
+      loadLordIconElement().then(() => setReady(true));
+    }
+  };
 
   const iconSrc =
     src ||
@@ -189,11 +223,20 @@ export default function LordIcon({
   if (qColor) colorParts.push(`quaternary:${qColor}`);
   const colorAttr = colorParts.join(",");
 
-  if (!ready || !iconSrc) {
+  if (!ready || !isVisible || !iconSrc) {
     return (
       <span
-        style={{ width: `${size}px`, height: `${size}px` }}
-        className={`inline-flex shrink-0 ${className}`}
+        ref={containerRef}
+        onMouseEnter={handleMouseEnter}
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          ...style,
+        }}
+        className={`shrink-0 ${className}`}
       />
     );
   }

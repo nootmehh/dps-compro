@@ -12,6 +12,8 @@ import CtaSection from "@/components/sections/cta";
 import RevealSection from "@/components/common/revealSection";
 import { getSiteContent } from "@/api/siteContent";
 
+export const revalidate = 60;
+
 export default async function HomePage() {
   const siteContent = await getSiteContent();
 
@@ -20,13 +22,11 @@ export default async function HomePage() {
       {/* Fixed Sticky Navbar */}
       <Navbar variant="auto" whatsappUrl={siteContent?.whatsapp_url || undefined} />
 
-      {/* 1. Hero Section */}
-      <RevealSection className="w-full" delay={80}>
-        <Hero
-          heroMediaUrl={siteContent?.hero_img_url || undefined}
-          whatsappUrl={siteContent?.whatsapp_url || undefined}
-        />
-      </RevealSection>
+      {/* 1. Hero Section (Rendered immediately above-the-fold for high Speed Index) */}
+      <Hero
+        heroMediaUrl={siteContent?.hero_img_url || undefined}
+        whatsappUrl={siteContent?.whatsapp_url || undefined}
+      />
 
       {/* 2. Why Choose Us (Key Metrics Bar) */}
       <RevealSection className="w-full">

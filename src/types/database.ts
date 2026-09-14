@@ -3,6 +3,7 @@ export interface Article {
   title: string;
   category: string | null;
   content: string | null;
+  img_url?: string | null;
   created_at: string;
   edited_at: string;
   category_color?: string | null;

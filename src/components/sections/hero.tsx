@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Button from "../ui/button";
 import { getSiteContent, isVideoUrl, formatWhatsAppUrl } from "@/api/siteContent";
 
@@ -91,11 +92,18 @@ export default function Hero({
           <div className="absolute inset-0 bg-dark/60 bg-linear-to-r from-dark/80 via-dark/50 to-dark/30" />
         </div>
       ) : (
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0 scale-105 transition-transform duration-1000"
-          style={{ backgroundImage: `url('${activeMediaSource}')` }}
-        >
-          <div className="absolute inset-0 bg-dark/60 bg-linear-to-r from-dark/80 via-dark/50 to-dark/30" />
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <Image
+            src={activeMediaSource}
+            alt="Hero background"
+            fill
+            priority
+            fetchPriority="high"
+            sizes="100vw"
+            quality={85}
+            className="object-cover scale-105 transition-transform duration-1000"
+          />
+          <div className="absolute inset-0 bg-dark/60 bg-linear-to-r from-dark/80 via-dark/50 to-dark/30 z-1" />
         </div>
       )}
 

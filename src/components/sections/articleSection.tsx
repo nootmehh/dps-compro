@@ -52,7 +52,7 @@ export default function ArticleSection({
         setFetchedArticles(
           data.map((a) => ({
             id: a.id,
-            imageSrc: "https://placehold.co/320x160",
+            imageSrc: a.img_url || "https://placehold.co/320x160",
             category: a.category || "Artikel",
             categoryColor: a.category_color || undefined,
             title: a.title,

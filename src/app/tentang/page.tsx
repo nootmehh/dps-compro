@@ -13,6 +13,8 @@ import CtaSection from "@/components/sections/cta";
 import RevealSection from "@/components/common/revealSection";
 import { getSiteContent } from "@/api/siteContent";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Tentang Kami",
   description:

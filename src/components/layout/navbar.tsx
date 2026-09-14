@@ -58,11 +58,12 @@ export default function Navbar({
   // Dedicated invisible container to measure the unconstrained natural width of desktop nav
   const measureRef = useRef<HTMLDivElement>(null);
 
-  // Fetch whatsapp_url if not provided
+  // Fetch whatsapp_url to ensure fresh CTA link
   useEffect(() => {
     if (whatsappUrl) {
       setSiteWhatsappUrl(whatsappUrl);
-    } else if (!onCtaClick) {
+    }
+    if (!onCtaClick) {
       let isMounted = true;
       getSiteContent().then((content) => {
         if (isMounted && content?.whatsapp_url) {
@@ -79,7 +80,7 @@ export default function Navbar({
     if (onCtaClick) {
       onCtaClick();
     } else {
-      const url = formatWhatsAppUrl(whatsappUrl || siteWhatsappUrl);
+      const url = formatWhatsAppUrl(siteWhatsappUrl || whatsappUrl);
       window.open(url, "_blank", "noopener,noreferrer");
     }
   };
@@ -99,31 +100,41 @@ export default function Navbar({
   // Using an off-screen measure element ensures the natural width is always measured
   // accurately without being compressed by flexbox or causing layout shifts.
   useEffect(() => {
+    let rafId: number | null = null;
+
     const checkCollision = () => {
-      const container = containerRef.current;
-      const logo = logoRef.current;
-      const measure = measureRef.current;
-      if (!container || !logo || !measure) return;
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        if (typeof window !== "undefined" && window.innerWidth < 1024) {
+          setIsColliding(true);
+          return;
+        }
 
-      const containerStyle = window.getComputedStyle(container);
-      const paddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
-      const paddingRight = parseFloat(containerStyle.paddingRight) || 0;
+        const container = containerRef.current;
+        const logo = logoRef.current;
+        const measure = measureRef.current;
+        if (!container || !logo || !measure) return;
 
-      // Actual available width inside container between left & right padding
-      const availableWidth = container.clientWidth - paddingLeft - paddingRight;
+        const containerStyle = window.getComputedStyle(container);
+        const paddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
+        const paddingRight = parseFloat(containerStyle.paddingRight) || 0;
 
-      // Exact logo width (natural aspect ratio for h-9 logo is ~300.4px)
-      const logoWidth = logo.getBoundingClientRect().width || 300.4;
+        // Actual available width inside container between left & right padding
+        const availableWidth = container.clientWidth - paddingLeft - paddingRight;
 
-      // Natural unconstrained width of the desktop navigation items + CTA
-      const navWidth = measure.getBoundingClientRect().width || 680;
+        // Exact logo width (natural aspect ratio for h-9 logo is ~300.4px)
+        const logoWidth = logo.getBoundingClientRect().width || 300.4;
 
-      // 32px safety collision buffer on the right of the logo
-      const GAP = 32;
+        // Natural unconstrained width of the desktop navigation items + CTA
+        const navWidth = measure.getBoundingClientRect().width || 680;
 
-      // Trigger sidebar variant whenever available space < (logoWidth + 32px + navWidth)
-      const shouldCollide = availableWidth < logoWidth + GAP + navWidth;
-      setIsColliding(shouldCollide);
+        // 32px safety collision buffer on the right of the logo
+        const GAP = 32;
+
+        // Trigger sidebar variant whenever available space < (logoWidth + 32px + navWidth)
+        const shouldCollide = availableWidth < logoWidth + GAP + navWidth;
+        setIsColliding(shouldCollide);
+      });
     };
 
     checkCollision();
@@ -142,6 +153,7 @@ export default function Navbar({
     window.addEventListener("orientationchange", checkCollision);
 
     return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
       ro.disconnect();
       window.removeEventListener("resize", checkCollision);
       window.removeEventListener("orientationchange", checkCollision);
@@ -294,15 +306,17 @@ export default function Navbar({
         aria-hidden="true"
       />
 
-      {/* Sidebar Panel — slides in from the left */}
+      {/* Sidebar Panel — 100% viewport mobile drawer */}
       <aside
         aria-label="Mobile Navigation Sidebar"
-        className={`fixed top-0 left-0 bottom-0 z-70 w-72 sm:w-80 h-screen bg-white text-dark shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-0 z-70 w-full h-[100dvh] max-h-[100dvh] bg-white text-dark shadow-2xl flex flex-col transition-all duration-300 ease-in-out ${
+          mobileMenuOpen
+            ? "translate-x-0 visible opacity-100 pointer-events-auto"
+            : "-translate-x-full invisible opacity-0 pointer-events-none"
         }`}
       >
-        {/* Sidebar Header: Logo only (no close button) */}
-        <div className="p-6 flex items-center border-b border-gray-100">
+        {/* Sidebar Header: Logo & Close Button */}
+        <div className="p-5 sm:p-6 flex items-center justify-between border-b border-gray-100 shrink-0">
           <Link
             href="/"
             onClick={() => setMobileMenuOpen(false)}
@@ -314,10 +328,30 @@ export default function Navbar({
               alt={brandTitle || "DPS Logo"}
             />
           </Link>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Tutup menu"
+            className="p-2 text-dark/70 hover:text-dark hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         </div>
 
         {/* Sidebar Body: Navigation Links */}
-        <nav className="flex-1 overflow-y-auto p-6 flex flex-col gap-2">
+        <nav className="flex-1 overflow-y-auto p-5 sm:p-6 flex flex-col gap-2">
           <span className="text-dark/40 text-sm font-sans tracking-wider uppercase mb-1">
             MENU
           </span>
@@ -341,7 +375,7 @@ export default function Navbar({
         </nav>
 
         {/* Sidebar Footer: CTA */}
-        <div className="p-6 border-t border-gray-100">
+        <div className="p-5 sm:p-6 border-t border-gray-100 shrink-0 pb-[max(1.5rem,env(safe-area-inset-bottom))] bg-white">
           <Button
             type="button"
             text={ctaText}
