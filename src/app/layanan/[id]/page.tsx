@@ -493,7 +493,7 @@ export default function ServiceDetailPage({
           </div>
 
           {/* Right Column Group: Sidebar (NAMA LAYANAN & CTA Section) */}
-          <aside className="contents min-[1200px]:flex min-[1200px]:flex-col min-[1200px]:w-96 min-[1200px]:justify-start min-[1200px]:items-start min-[1200px]:gap-6 min-[1200px]:shrink-0 min-[1200px]:self-stretch">
+          <aside className="contents min-[1200px]:flex min-[1200px]:flex-col min-[1200px]:w-96 min-[1200px]:justify-start min-[1200px]:items-start min-[1200px]:gap-6 min-[1200px]:shrink-0 min-[1200px]:sticky min-[1200px]:top-28 min-[1200px]:self-start min-[1200px]:max-h-[calc(100vh-8rem)] min-[1200px]:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {/* 2. Card: Service Details Summary */}
             <div className="order-2 w-full p-6 bg-brand-background rounded-3xl flex flex-col justify-start items-start gap-3">
               <span className="text-dark/40 text-xs sm:text-sm font-normal font-sans tracking-wider uppercase">
@@ -521,7 +521,7 @@ export default function ServiceDetailPage({
                   ? "1.5px solid var(--g1, #0A9863)"
                   : "1.5px solid transparent",
               }}
-              className="order-3 w-full p-6 bg-brand-background rounded-3xl flex flex-col justify-start items-start gap-4 text-left transition-all duration-200 select-none group min-[1200px]:sticky min-[1200px]:top-28"
+              className="order-3 w-full p-6 bg-brand-background rounded-3xl flex flex-col justify-start items-start gap-4 text-left transition-all duration-200 select-none group"
             >
               <div className="self-start">
                 <LordIcon

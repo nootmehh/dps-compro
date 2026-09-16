@@ -306,10 +306,10 @@ export default function Navbar({
         aria-hidden="true"
       />
 
-      {/* Sidebar Panel — 100% viewport mobile drawer */}
+      {/* Sidebar Panel — snug width with backdrop space */}
       <aside
         aria-label="Mobile Navigation Sidebar"
-        className={`fixed inset-0 z-70 w-full h-[100dvh] max-h-[100dvh] bg-white text-dark shadow-2xl flex flex-col transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 bottom-0 z-70 w-[min(300px,calc(100vw-3rem))] sm:w-80 h-[100dvh] max-h-[100dvh] bg-white text-dark shadow-2xl rounded-r-3xl flex flex-col transition-all duration-300 ease-in-out ${
           mobileMenuOpen
             ? "translate-x-0 visible opacity-100 pointer-events-auto"
             : "-translate-x-full invisible opacity-0 pointer-events-none"
@@ -375,7 +375,7 @@ export default function Navbar({
         </nav>
 
         {/* Sidebar Footer: CTA */}
-        <div className="p-5 sm:p-6 border-t border-gray-100 shrink-0 pb-[max(1.5rem,env(safe-area-inset-bottom))] bg-white">
+        <div className="p-5 sm:p-6 border-t border-gray-100 shrink-0 pb-[max(1.5rem,env(safe-area-inset-bottom))] bg-white rounded-br-3xl">
           <Button
             type="button"
             text={ctaText}

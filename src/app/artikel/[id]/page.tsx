@@ -254,10 +254,7 @@ export default function ArticleDetailPage({
           </article>
 
           {/* Right Column: Sidebar "Artikel Lainnya" */}
-          <aside
-            style={{ position: "sticky", top: "112px" }}
-            className="w-full lg:w-96 p-6 bg-brand-background rounded-3xl flex flex-col justify-start items-start gap-4 shrink-0 shadow-xs self-start"
-          >
+          <aside className="w-full lg:w-96 p-6 bg-brand-background rounded-3xl flex flex-col justify-start items-start gap-4 shrink-0 shadow-xs self-start lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {/* Sidebar Title */}
             <h2 className="text-dark/40 text-xs sm:text-sm font-normal font-sans tracking-wider uppercase">
               ARTIKEL LAINNYA
