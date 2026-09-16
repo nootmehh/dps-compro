@@ -81,6 +81,9 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: ["/dps-logo-default.png"],
     },
+    verification: {
+      google: "LwxrHJ9tqIuOTD3WXFO42ja6dI4Pa-nbkXfK0MXOC0M",
+    },
   };
 }
 
@@ -106,6 +109,10 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${openSans.variable} font-sans antialiased`} suppressHydrationWarning>
       <head>
+        <meta
+          name="google-site-verification"
+          content="LwxrHJ9tqIuOTD3WXFO42ja6dI4Pa-nbkXfK0MXOC0M"
+        />
         <link rel="icon" href={favicon} type={faviconType} />
         <link rel="shortcut icon" href={favicon} />
         <link rel="apple-touch-icon" href={favicon} />
