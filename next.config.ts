@@ -30,6 +30,17 @@ const nextConfig: NextConfig = {
         destination: "https://dev.dpsmarkajalan.com/:path*",
         permanent: true,
       },
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "dpscompro.netlify.app",
+          },
+        ],
+        destination: "https://dpsmarkajalan.com/:path*",
+        permanent: true,
+      },
     ];
   },
 };

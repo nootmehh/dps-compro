@@ -89,7 +89,7 @@ export default function Hero({
             className="w-full h-full object-cover scale-105 transition-transform duration-1000"
             src={media}
           />
-          <div className="absolute inset-0 bg-dark/60 bg-linear-to-r from-dark/80 via-dark/50 to-dark/30" />
+          <div className="absolute inset-0 bg-black/50" />
         </div>
       ) : (
         <div className="absolute inset-0 z-0 overflow-hidden">
@@ -103,7 +103,7 @@ export default function Hero({
             quality={85}
             className="object-cover scale-105 transition-transform duration-1000"
           />
-          <div className="absolute inset-0 bg-dark/60 bg-linear-to-r from-dark/80 via-dark/50 to-dark/30 z-1" />
+          <div className="absolute inset-0 bg-black/50 z-1" />
         </div>
       )}
 

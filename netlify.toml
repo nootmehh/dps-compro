@@ -9,3 +9,15 @@
   to = "https://dev.dpsmarkajalan.com/:splat"
   status = 301
   force = true
+
+[[redirects]]
+  from = "https://dpscompro.netlify.app/*"
+  to = "https://dpsmarkajalan.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://dpscompro.netlify.app/*"
+  to = "https://dpsmarkajalan.com/:splat"
+  status = 301
+  force = true
