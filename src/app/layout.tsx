@@ -43,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: new URL(
-      process.env.NEXT_PUBLIC_SITE_URL || "https://dev.dpsmarkajalan.com"
+      process.env.NEXT_PUBLIC_SITE_URL || "https://dpsmarkajalan.com"
     ),
     title: {
       default: title,
