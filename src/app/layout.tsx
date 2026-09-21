@@ -43,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: new URL(
-      process.env.NEXT_PUBLIC_SITE_URL || "https://dev.dpsmarkajalan.com"
+      process.env.NEXT_PUBLIC_SITE_URL || "https://dpsmarkajalan.com"
     ),
     title: {
       default: title,
@@ -53,17 +53,19 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords,
     icons: {
       icon: [
-        { url: favicon, type: faviconType },
-        { url: "/favicon.ico" },
+        { url: favicon, type: faviconType, sizes: "192x192" },
+        { url: "/default-favicon.ico", sizes: "48x48", type: "image/x-icon" },
       ],
       shortcut: favicon,
-      apple: favicon,
+      apple: [
+        { url: favicon, sizes: "180x180" },
+      ],
     },
     openGraph: {
       title,
       description,
       url: "/",
-      siteName: "PT. Dua Putra Srikandi",
+      siteName: "Dua Putra Srikandi",
       locale: "id_ID",
       type: "website",
       images: [
@@ -106,6 +108,27 @@ export default async function RootLayout({
       ? seo.ga_measurement_id.trim()
       : "G-3S0T90E0TT";
 
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL || "https://dpsmarkajalan.com"
+  ).replace(/\/$/, "");
+
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Dua Putra Srikandi",
+    alternateName: ["PT. Dua Putra Srikandi", "DPS Marka Jalan", "DPS"],
+    url: siteUrl,
+  };
+
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "PT. Dua Putra Srikandi",
+    alternateName: "Dua Putra Srikandi",
+    url: siteUrl,
+    logo: `${siteUrl}/dps-logo-default.png`,
+  };
+
   return (
     <html lang="en" className={`${openSans.variable} font-sans antialiased`} suppressHydrationWarning>
       <head>
@@ -113,9 +136,19 @@ export default async function RootLayout({
           name="google-site-verification"
           content="LwxrHJ9tqIuOTD3WXFO42ja6dI4Pa-nbkXfK0MXOC0M"
         />
-        <link rel="icon" href={favicon} type={faviconType} />
+        <link rel="icon" href={favicon} type={faviconType} sizes="192x192" />
+        <link rel="icon" href="/default-favicon.ico" sizes="48x48" type="image/x-icon" />
         <link rel="shortcut icon" href={favicon} />
-        <link rel="apple-touch-icon" href={favicon} />
+        <link rel="apple-touch-icon" href={favicon} sizes="180x180" />
+        {/* Google Site Name & Organization Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         {/* Google tag (gtag.js) - Google Analytics across all pages */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
