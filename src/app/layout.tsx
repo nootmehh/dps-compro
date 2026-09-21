@@ -53,12 +53,14 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords,
     icons: {
       icon: [
-        { url: favicon, type: faviconType, sizes: "192x192" },
-        { url: "/default-favicon.ico", sizes: "48x48", type: "image/x-icon" },
+        { url: favicon, type: faviconType },
+        { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
+        { url: "/default-favicon.ico", sizes: "any" },
       ],
       shortcut: favicon,
       apple: [
-        { url: favicon, sizes: "180x180" },
+        { url: "/icon-192.png", sizes: "180x180" },
       ],
     },
     openGraph: {
@@ -136,10 +138,6 @@ export default async function RootLayout({
           name="google-site-verification"
           content="LwxrHJ9tqIuOTD3WXFO42ja6dI4Pa-nbkXfK0MXOC0M"
         />
-        <link rel="icon" href={favicon} type={faviconType} sizes="192x192" />
-        <link rel="icon" href="/default-favicon.ico" sizes="48x48" type="image/x-icon" />
-        <link rel="shortcut icon" href={favicon} />
-        <link rel="apple-touch-icon" href={favicon} sizes="180x180" />
         {/* Google Site Name & Organization Structured Data */}
         <script
           type="application/ld+json"
