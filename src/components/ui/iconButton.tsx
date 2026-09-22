@@ -8,7 +8,8 @@ export type IconButtonSize = "default" | "sm" | "lg";
 
 export interface IconButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "size"> {
-  icon: string;
+  icon?: string;
+  customIcon?: React.ReactNode;
   iconSize?: number;
   iconColor?: string;
   primaryColor?: string;
@@ -24,6 +25,7 @@ export interface IconButtonProps
 
 export default function IconButton({
   icon,
+  customIcon,
   iconSize = 20,
   iconColor,
   primaryColor: propPrimaryColor,
@@ -93,13 +95,15 @@ export default function IconButton({
         className={baseClasses}
         onClick={onClick as unknown as AnchorHTMLAttributes<HTMLAnchorElement>["onClick"]}
       >
-        <LordIcon
-          name={icon}
-          size={iconSize}
-          primaryColor={primaryColor}
-          secondaryColor={secondaryColor}
-          target="a"
-        />
+        {customIcon || (
+          <LordIcon
+            name={icon || ""}
+            size={iconSize}
+            primaryColor={primaryColor}
+            secondaryColor={secondaryColor}
+            target="a"
+          />
+        )}
       </a>
     );
   }
@@ -113,13 +117,15 @@ export default function IconButton({
       onClick={onClick}
       {...props}
     >
-      <LordIcon
-        name={icon}
-        size={iconSize}
-        primaryColor={primaryColor}
-        secondaryColor={secondaryColor}
-        target="button"
-      />
+      {customIcon || (
+        <LordIcon
+          name={icon || ""}
+          size={iconSize}
+          primaryColor={primaryColor}
+          secondaryColor={secondaryColor}
+          target="button"
+        />
+      )}
     </button>
   );
 }

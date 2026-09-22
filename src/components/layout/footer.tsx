@@ -100,6 +100,7 @@ export default function Footer({
           icon: config.icon,
           primaryColor: config.primaryColor,
           secondaryColor: config.secondaryColor,
+          isShopee: config.isShopee || false,
         };
       });
   }, [rawSocialMedia]);
@@ -241,7 +242,7 @@ export default function Footer({
                     {socialList.map((social) => (
                       <IconButton
                         key={social.id}
-                        icon={social.icon}
+                        icon={social.isShopee ? undefined : social.icon}
                         href={social.href}
                         target="_blank"
                         title={social.title}
@@ -249,6 +250,16 @@ export default function Footer({
                         iconSize={28}
                         iconColor={social.primaryColor}
                         secondaryColor={social.secondaryColor}
+                        className={social.isShopee ? "overflow-visible" : undefined}
+                        customIcon={
+                          social.isShopee ? (
+                            <img
+                              src="/shopee.svg"
+                              alt="Shopee"
+                              className="w-6.5 h-6.5 object-contain select-none transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-125 group-hover:-translate-y-1 drop-shadow-sm pointer-events-none"
+                            />
+                          ) : undefined
+                        }
                       />
                     ))}
                   </div>
@@ -286,6 +297,17 @@ export default function Footer({
 
 export function getSocialMediaConfig(type?: string | null) {
   const clean = (type || "").toLowerCase().trim();
+
+  // Shopee uses custom SVG icon with pop-up hover effect
+  if (clean.includes("shopee") || clean.includes("shop")) {
+    return {
+      icon: "/shopee.svg",
+      title: "Shopee",
+      primaryColor: "#FFFFFF",
+      secondaryColor: "#0A9863",
+      isShopee: true,
+    };
+  }
 
   // TikTok, LinkedIn, and X use first color: white-100 (#FFFFFF), secondary: g1 (#0A9863)
   // Others use first color: g1 (#0A9863), secondary: white-100 (#FFFFFF)
