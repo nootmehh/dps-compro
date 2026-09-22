@@ -32,15 +32,6 @@ export async function generateMetadata(): Promise<Metadata> {
     .map((k) => k.trim())
     .filter(Boolean);
 
-  const favicon = seo?.favicon_url?.trim() || "/default-favicon.ico";
-  const faviconType = favicon.endsWith(".webp")
-    ? "image/webp"
-    : favicon.endsWith(".png")
-    ? "image/png"
-    : favicon.endsWith(".svg")
-    ? "image/svg+xml"
-    : "image/x-icon";
-
   return {
     metadataBase: new URL(
       process.env.NEXT_PUBLIC_SITE_URL || "https://dpsmarkajalan.com"
@@ -51,15 +42,15 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description,
     keywords,
+    // favicon.ico served natively from src/app/favicon.ico by Next.js App Router
     icons: {
       icon: [
-        { url: "/favicon.ico?v=2", sizes: "any" },
-        { url: "/icon.png?v=2", type: "image/png", sizes: "96x96" },
-        { url: "/icon-192.png?v=2", type: "image/png", sizes: "192x192" },
+        { url: "/favicon.ico", sizes: "any" },
+        { url: "/icon.png", type: "image/png", sizes: "96x96" },
       ],
-      shortcut: "/favicon.ico?v=2",
+      shortcut: "/favicon.ico",
       apple: [
-        { url: "/apple-touch-icon.png?v=2", sizes: "180x180", type: "image/png" },
+        { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
       ],
     },
     openGraph: {
@@ -96,14 +87,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const seo = await getSeoSettings();
-  const favicon = seo?.favicon_url?.trim() || "/default-favicon.ico";
-  const faviconType = favicon.endsWith(".webp")
-    ? "image/webp"
-    : favicon.endsWith(".png")
-    ? "image/png"
-    : favicon.endsWith(".svg")
-    ? "image/svg+xml"
-    : "image/x-icon";
   const gaId =
     seo?.ga_connected && seo?.ga_measurement_id?.trim()
       ? seo.ga_measurement_id.trim()
@@ -137,9 +120,6 @@ export default async function RootLayout({
           name="google-site-verification"
           content="LwxrHJ9tqIuOTD3WXFO42ja6dI4Pa-nbkXfK0MXOC0M"
         />
-        <link rel="icon" href="/favicon.ico?v=2" sizes="any" />
-        <link rel="icon" href="/icon.png?v=2" type="image/png" sizes="96x96" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" sizes="180x180" />
         {/* Google Site Name & Organization Structured Data */}
         <script
           type="application/ld+json"
