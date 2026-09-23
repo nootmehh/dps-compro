@@ -85,6 +85,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     verification: {
       google: "ui0qt0eB5J39H-iTttcYbh4rVJsBoWLBnq1eLN7pil4",
+      other: {
+        "msvalidate.01": "0FC5FF3CCC2E852EA9D76E41BA4F939F",
+      },
     },
   };
 }
@@ -129,6 +132,8 @@ export default async function RootLayout({
           name="google-site-verification"
           content="ui0qt0eB5J39H-iTttcYbh4rVJsBoWLBnq1eLN7pil4"
         />
+        {/* Bing Webmaster Tools verification */}
+        <meta name="msvalidate.01" content="0FC5FF3CCC2E852EA9D76E41BA4F939F" />
         {/* Google Site Name & Organization Structured Data */}
         <script
           type="application/ld+json"
