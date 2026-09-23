@@ -34,7 +34,7 @@ export async function generateMetadata({
     (service.service_image_url &&
       service.service_image_url.length > 0 &&
       service.service_image_url[0]) ||
-    "/dps-logo-default.png";
+    "/og-image.png";
 
   return {
     title,

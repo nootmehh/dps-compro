@@ -57,15 +57,23 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       url: "/",
-      siteName: "Dua Putra Srikandi",
+      siteName: "PT. Dua Putra Srikandi",
       locale: "id_ID",
       type: "website",
       images: [
         {
-          url: "/dps-logo-default.png",
+          url: "/og-image.png",
           width: 1200,
           height: 630,
-          alt: title,
+          type: "image/png",
+          alt: `${title} - PT. Dua Putra Srikandi`,
+        },
+        {
+          url: "/og-image-square.png",
+          width: 600,
+          height: 600,
+          type: "image/png",
+          alt: `${title} - PT. Dua Putra Srikandi`,
         },
       ],
     },
@@ -73,10 +81,10 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: ["/dps-logo-default.png"],
+      images: ["/og-image.png"],
     },
     verification: {
-      google: "LwxrHJ9tqIuOTD3WXFO42ja6dI4Pa-nbkXfK0MXOC0M",
+      google: "ui0qt0eB5J39H-iTttcYbh4rVJsBoWLBnq1eLN7pil4",
     },
   };
 }
@@ -110,7 +118,8 @@ export default async function RootLayout({
     name: "PT. Dua Putra Srikandi",
     alternateName: "Dua Putra Srikandi",
     url: siteUrl,
-    logo: `${siteUrl}/dps-logo-default.png`,
+    logo: `${siteUrl}/icon-192.png`,
+    image: `${siteUrl}/og-image.png`,
   };
 
   return (
@@ -118,7 +127,7 @@ export default async function RootLayout({
       <head>
         <meta
           name="google-site-verification"
-          content="LwxrHJ9tqIuOTD3WXFO42ja6dI4Pa-nbkXfK0MXOC0M"
+          content="ui0qt0eB5J39H-iTttcYbh4rVJsBoWLBnq1eLN7pil4"
         />
         {/* Google Site Name & Organization Structured Data */}
         <script

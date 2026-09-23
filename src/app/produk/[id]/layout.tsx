@@ -26,7 +26,7 @@ export async function generateMetadata({
       product.product_image_url.length > 0 &&
       product.product_image_url[0]) ||
     product.highlight_img_url ||
-    "/dps-logo-default.png";
+    "/og-image.png";
 
   return {
     title,

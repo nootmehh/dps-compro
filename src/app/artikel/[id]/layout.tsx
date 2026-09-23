@@ -24,7 +24,7 @@ export async function generateMetadata({
     description = clean.length > 160 ? clean.slice(0, 157) + "..." : clean;
   }
 
-  const imageUrl = article.img_url || "/dps-logo-default.png";
+  const imageUrl = article.img_url || "/og-image.png";
 
   return {
     title,

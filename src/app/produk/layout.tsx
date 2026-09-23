@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     locale: "id_ID",
     images: [
       {
-        url: "/dps-logo-default.png",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Katalog Produk PT. Dua Putra Srikandi",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: "Katalog Produk | PT. Dua Putra Srikandi",
     description:
       "Katalog lengkap produk cat marka jalan thermoplastic, coldplastic, glass beads, rambu, paku jalan, dan perlengkapan keselamatan jalan berkualitas dari PT. Dua Putra Srikandi.",
-    images: ["/dps-logo-default.png"],
+    images: ["/og-image.png"],
   },
 };
 

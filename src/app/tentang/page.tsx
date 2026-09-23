@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     locale: "id_ID",
     images: [
       {
-        url: "/dps-logo-default.png",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Tentang PT. Dua Putra Srikandi",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     title: "Tentang Kami | PT. Dua Putra Srikandi",
     description:
       "Profil PT. Dua Putra Srikandi - Kontraktor terpercaya spesialis pengecatan marka jalan, penyedia bahan, rambu lalu lintas, dan perlengkapan keselamatan jalan berstandar nasional.",
-    images: ["/dps-logo-default.png"],
+    images: ["/og-image.png"],
   },
 };
 
