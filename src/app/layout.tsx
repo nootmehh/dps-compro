@@ -42,15 +42,31 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description,
     keywords,
-    // favicon.ico served natively from src/app/favicon.ico by Next.js App Router
+    // Favicon & app icons using versioned filenames to bypass search engine CDN caches
     icons: {
       icon: [
-        { url: "/favicon.ico", sizes: "any" },
-        { url: "/icon.png", type: "image/png", sizes: "96x96" },
+        {
+          url: "https://dpsmarkajalan.com/icon-dps-v2.png",
+          type: "image/png",
+          sizes: "96x96",
+        },
+        {
+          url: "https://dpsmarkajalan.com/icon-dps-v2-48.png",
+          type: "image/png",
+          sizes: "48x48",
+        },
+        {
+          url: "https://dpsmarkajalan.com/favicon-v2.ico",
+          sizes: "any",
+        },
       ],
-      shortcut: "/favicon.ico",
+      shortcut: "https://dpsmarkajalan.com/favicon-v2.ico",
       apple: [
-        { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+        {
+          url: "https://dpsmarkajalan.com/apple-icon-v2.png",
+          sizes: "180x180",
+          type: "image/png",
+        },
       ],
     },
     openGraph: {
@@ -121,13 +137,32 @@ export default async function RootLayout({
     name: "PT. Dua Putra Srikandi",
     alternateName: "Dua Putra Srikandi",
     url: siteUrl,
-    logo: `${siteUrl}/icon-192.png`,
+    logo: `${siteUrl}/icon-dps-v2.png`,
     image: `${siteUrl}/og-image.png`,
   };
 
   return (
     <html lang="en" className={`${openSans.variable} font-sans antialiased`} suppressHydrationWarning>
       <head>
+        {/* Favicon links for search engines (cache-busting v2) */}
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="48x48"
+          href="https://dpsmarkajalan.com/icon-dps-v2-48.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="96x96"
+          href="https://dpsmarkajalan.com/icon-dps-v2.png"
+        />
+        <link rel="shortcut icon" href="https://dpsmarkajalan.com/favicon-v2.ico" />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="https://dpsmarkajalan.com/apple-icon-v2.png"
+        />
         <meta
           name="google-site-verification"
           content="ui0qt0eB5J39H-iTttcYbh4rVJsBoWLBnq1eLN7pil4"
