@@ -56,6 +56,11 @@ export async function generateMetadata(): Promise<Metadata> {
           sizes: "48x48",
         },
         {
+          url: "https://dpsmarkajalan.com/icon-dps-v2-32.png",
+          type: "image/png",
+          sizes: "32x32",
+        },
+        {
           url: "https://dpsmarkajalan.com/favicon-v2.ico",
           sizes: "any",
         },
@@ -150,6 +155,12 @@ export default async function RootLayout({
           type="image/png"
           sizes="48x48"
           href="https://dpsmarkajalan.com/icon-dps-v2-48.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="https://dpsmarkajalan.com/icon-dps-v2-32.png"
         />
         <link
           rel="icon"
