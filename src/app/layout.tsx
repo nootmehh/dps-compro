@@ -32,10 +32,15 @@ export async function generateMetadata(): Promise<Metadata> {
     .map((k) => k.trim())
     .filter(Boolean);
 
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL || "https://dpsmarkajalan.com"
+  ).replace(/\/$/, "");
+
   return {
-    metadataBase: new URL(
-      process.env.NEXT_PUBLIC_SITE_URL || "https://dpsmarkajalan.com"
-    ),
+    metadataBase: new URL(siteUrl),
+    alternates: {
+      canonical: siteUrl,
+    },
     title: {
       default: title,
       template: `%s | ${title}`,
