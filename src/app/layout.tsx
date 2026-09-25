@@ -46,11 +46,6 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       icon: [
         {
-          url: "https://dpsmarkajalan.com/icon-dps-v2.png",
-          type: "image/png",
-          sizes: "96x96",
-        },
-        {
           url: "https://dpsmarkajalan.com/icon-dps-v2-48.png",
           type: "image/png",
           sizes: "48x48",
@@ -59,6 +54,11 @@ export async function generateMetadata(): Promise<Metadata> {
           url: "https://dpsmarkajalan.com/icon-dps-v2-32.png",
           type: "image/png",
           sizes: "32x32",
+        },
+        {
+          url: "https://dpsmarkajalan.com/icon-dps-v2.png",
+          type: "image/png",
+          sizes: "96x96",
         },
         {
           url: "https://dpsmarkajalan.com/favicon-v2.ico",
@@ -149,31 +149,6 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${openSans.variable} font-sans antialiased`} suppressHydrationWarning>
       <head>
-        {/* Favicon links for search engines (cache-busting v2) */}
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="48x48"
-          href="https://dpsmarkajalan.com/icon-dps-v2-48.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="https://dpsmarkajalan.com/icon-dps-v2-32.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="96x96"
-          href="https://dpsmarkajalan.com/icon-dps-v2.png"
-        />
-        <link rel="shortcut icon" href="https://dpsmarkajalan.com/favicon-v2.ico" />
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="https://dpsmarkajalan.com/apple-icon-v2.png"
-        />
         <meta
           name="google-site-verification"
           content="ui0qt0eB5J39H-iTttcYbh4rVJsBoWLBnq1eLN7pil4"
