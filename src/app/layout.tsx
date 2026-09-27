@@ -47,6 +47,18 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description,
     keywords,
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "any" },
+        { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+        { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+        { url: "/favicon-48x48.png", type: "image/png", sizes: "48x48" },
+      ],
+      apple: [
+        { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      ],
+    },
+    manifest: "/site.webmanifest",
     openGraph: {
       title,
       description,
@@ -122,6 +134,11 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${openSans.variable} font-sans antialiased`} suppressHydrationWarning>
       <head>
+        {/* Favicon & Web Manifest */}
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="manifest" href="/site.webmanifest" />
         <meta
           name="google-site-verification"
           content="ui0qt0eB5J39H-iTttcYbh4rVJsBoWLBnq1eLN7pil4"
