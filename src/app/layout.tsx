@@ -47,38 +47,6 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description,
     keywords,
-    // Favicon & app icons using versioned filenames to bypass search engine CDN caches
-    icons: {
-      icon: [
-        {
-          url: "https://dpsmarkajalan.com/icon-dps-v2-48.png",
-          type: "image/png",
-          sizes: "48x48",
-        },
-        {
-          url: "https://dpsmarkajalan.com/icon-dps-v2-32.png",
-          type: "image/png",
-          sizes: "32x32",
-        },
-        {
-          url: "https://dpsmarkajalan.com/icon-dps-v2.png",
-          type: "image/png",
-          sizes: "96x96",
-        },
-        {
-          url: "https://dpsmarkajalan.com/favicon-v2.ico",
-          sizes: "any",
-        },
-      ],
-      shortcut: "https://dpsmarkajalan.com/favicon-v2.ico",
-      apple: [
-        {
-          url: "https://dpsmarkajalan.com/apple-icon-v2.png",
-          sizes: "180x180",
-          type: "image/png",
-        },
-      ],
-    },
     openGraph: {
       title,
       description,
@@ -147,7 +115,7 @@ export default async function RootLayout({
     name: "PT. Dua Putra Srikandi",
     alternateName: "Dua Putra Srikandi",
     url: siteUrl,
-    logo: `${siteUrl}/icon-dps-v2.png`,
+    logo: `${siteUrl}/dps-logo-icon.png`,
     image: `${siteUrl}/og-image.png`,
   };
 
