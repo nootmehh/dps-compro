@@ -100,6 +100,29 @@ dps-compro/
 - Node.js (v18.17.0 or higher recommended)
 - npm, yarn, or pnpm package manager
 
+---
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory before running the application:
+
+```env
+# Supabase Configuration (Public API Access)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
+
+# Website Base URL (Canonical & Open Graph metadata)
+NEXT_PUBLIC_SITE_URL=https://dpsmarkajalan.com
+```
+
+| Variable | Required | Description |
+| :--- | :---: | :--- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project API endpoint URL |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes | Public Supabase anon/publishable key for fetching content |
+| `NEXT_PUBLIC_SITE_URL` | Optional | Public domain for sitemap, robots, and SEO metadata (defaults to `https://dpsmarkajalan.com`) |
+
+---
+
 ### Installation
 
 1. Install project dependencies:
@@ -107,7 +130,9 @@ dps-compro/
    npm install
    ```
 
-2. Run the local development server:
+2. Configure environment variables by creating `.env.local` as described above.
+
+3. Run the local development server:
    ```bash
    npm run dev
    ```
